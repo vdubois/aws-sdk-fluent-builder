@@ -1,0 +1,39 @@
+{
+  "name": "aws-sdk-fluent-builder",
+  "version": "0.0.1",
+  "description": "Fluent builder API for AWS SDK",
+  "main": "index.ts",
+  "scripts": {
+    "test": "ts-node ./spec/runner.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/vdubois/aws-sdk-fluent-builder.git"
+  },
+  "keywords": [
+    "aws",
+    "sdk",
+    "fluent",
+    "builder",
+    "aws-sdk"
+  ],
+  "author": "Vincent Dubois",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vdubois/aws-sdk-fluent-builder/issues"
+  },
+  "homepage": "https://github.com/vdubois/aws-sdk-fluent-builder#readme",
+  "devDependencies": {
+    "@types/jasmine": "^2.8.2",
+    "@types/node": "^8.0.58",
+    "jasmine": "^2.8.0",
+    "jasmine-reporters": "^2.2.1",
+    "jasmine-spec-reporter": "^4.2.1",
+    "ts-node": "^4.0.1",
+    "tslint": "^5.8.0",
+    "typescript": "^2.6.2"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.169.0"
+  }
+}
