@@ -1,3 +1,6 @@
+import {DynamoDbRepository} from '../repositories/dynamo-db.repository';
+import {DynamoDbRepositoryImplementation} from '../repositories/dynamo-db.repository.implementation';
+import {DynamoDbRepositoryProxy} from '../repositories/dynamo-db.repository.proxy';
 
 export class DynamoDbBuilder {
 
@@ -38,58 +41,18 @@ export class DynamoDbBuilder {
         }
         if (this.mustCreateBeforeUse) {
             return new DynamoDbRepositoryProxy(
-                new DynamoDbRepositoryImplementation(this.tableName, this.keyName, this.readCapacity, this.writeCapacity));
+                new DynamoDbRepositoryImplementation({
+                    tableName: this.tableName,
+                    keyName: this.keyName,
+                    readCapacity: this.readCapacity,
+                    writeCapacity: this.writeCapacity
+                }));
         }
-        return new DynamoDbRepositoryImplementation(this.tableName, this.keyName, this.readCapacity, this.writeCapacity);
-    }
-}
-
-export interface DynamoDbRepository {
-
-    findAll(): Promise<any>;
-}
-
-class DynamoDbRepositoryProxy implements DynamoDbRepository {
-
-    constructor(private dynamoDbRepository: DynamoDbRepositoryImplementation) {
-
-    }
-
-    createIfNotExists(): Promise<any> {
-        return Promise.resolve('Table créée')
-    }
-
-    findAll(): Promise<any> {
-        return this.createIfNotExists()
-            .then(createResult => {
-                return this.dynamoDbRepository.findAll();
-            });
-    }
-}
-
-class DynamoDbRepositoryImplementation implements DynamoDbRepository {
-
-    public constructor(private _tableName: string, private _keyName: string, private _readCapacity: number, private _writeCapacity: number) {
-
-    }
-
-    get tableName(): string {
-        return this._tableName;
-    }
-
-    get keyName(): string {
-        return this._keyName;
-    }
-
-    get readCapacity(): number {
-        return this._readCapacity;
-    }
-
-    get writeCapacity(): number {
-        return this._writeCapacity;
-    }
-
-    findAll(): Promise<any> {
-        return Promise.resolve([]);
+        return new DynamoDbRepositoryImplementation({
+            tableName: this.tableName,
+            keyName: this.keyName,
+            readCapacity: this.readCapacity,
+            writeCapacity: this.writeCapacity
+        });
     }
 }
