@@ -1,5 +1,3 @@
-import {DocumentClient} from 'aws-sdk/clients/dynamodb';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
 
 export class DynamoDbBuilder {
 
@@ -48,6 +46,7 @@ export class DynamoDbBuilder {
 
 export interface DynamoDbRepository {
 
+    findAll(): Promise<any>;
 }
 
 class DynamoDbRepositoryProxy implements DynamoDbRepository {
@@ -56,7 +55,16 @@ class DynamoDbRepositoryProxy implements DynamoDbRepository {
 
     }
 
+    createIfNotExists(): Promise<any> {
+        return Promise.resolve('Table créée')
+    }
 
+    findAll(): Promise<any> {
+        return this.createIfNotExists()
+            .then(createResult => {
+                return this.dynamoDbRepository.findAll();
+            });
+    }
 }
 
 class DynamoDbRepositoryImplementation implements DynamoDbRepository {
@@ -79,5 +87,9 @@ class DynamoDbRepositoryImplementation implements DynamoDbRepository {
 
     get writeCapacity(): number {
         return this._writeCapacity;
+    }
+
+    findAll(): Promise<any> {
+        return Promise.resolve([]);
     }
 }

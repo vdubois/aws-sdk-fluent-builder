@@ -132,4 +132,45 @@ describe('DynamoDBBuilder', () => {
             done();
         });
     });
+
+    describe('findAll function', () => {
+
+        it('should call create table when invoked if create if not exists option was selected', done => {
+            // GIVEN
+            const dynamoDbRepository = new DynamoDbBuilder()
+                .withTableName('toto')
+                .createIfNotExists()
+                .build();
+            spyOn(dynamoDbRepository, 'createIfNotExists').and.callThrough();
+            spyOn(dynamoDbRepository, 'findAll').and.callThrough();
+
+            // WHEN
+            dynamoDbRepository.findAll().then(result => {
+                // THEN
+                expect(dynamoDbRepository.createIfNotExists).toHaveBeenCalled();
+                done();
+            }).catch(exception => {
+                fail(exception);
+                done();
+            })
+        });
+
+        it('should not call create table when invoked if create if not exists option was not selected', done => {
+            // GIVEN
+            const dynamoDbRepository = new DynamoDbBuilder()
+                .withTableName('toto')
+                .build();
+            spyOn(dynamoDbRepository, 'findAll').and.callThrough();
+
+            // WHEN
+            dynamoDbRepository.findAll().then(result => {
+                // THEN
+                expect(dynamoDbRepository.createIfNotExists).toBeUndefined();
+                done();
+            }).catch(exception => {
+                fail(exception);
+                done();
+            })
+        });
+    });
 });
