@@ -33,4 +33,29 @@ export class DynamoDbRepositoryProxy implements DynamoDbRepository {
         return this.createIfNotExists()
             .then(() => this.dynamoDbRepository.findAll());
     }
+
+    findById(id: string): Promise<any> {
+        return this.createIfNotExists()
+            .then(() => this.dynamoDbRepository.findById(id));
+    }
+
+    findBy(field: string, value: string): Promise<Array<any>> {
+        return this.createIfNotExists()
+            .then(() => this.dynamoDbRepository.findBy(field, value));
+    }
+
+    save(entity: object): Promise<any> {
+        return this.createIfNotExists()
+            .then(() => this.dynamoDbRepository.save(entity));
+    }
+
+    deleteById(id: string): Promise<any> {
+        return this.createIfNotExists()
+            .then(() => this.dynamoDbRepository.deleteById(id));
+    }
+
+    deleteAll(): Promise<any> {
+        return this.createIfNotExists()
+            .then(() => this.dynamoDbRepository.deleteAll());
+    }
 }
