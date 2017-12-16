@@ -59,9 +59,9 @@ describe('DynamoDBBuilder', () => {
 
             // THEN
             expect(dynamoDbRepository).not.toBeNull();
-            expect(dynamoDbRepository.keyName).toEqual('id');
-            expect(dynamoDbRepository.readCapacity).toEqual(1);
-            expect(dynamoDbRepository.writeCapacity).toEqual(1);
+            expect(dynamoDbRepository['keyName']).toEqual('id');
+            expect(dynamoDbRepository['readCapacity']).toEqual(1);
+            expect(dynamoDbRepository['writeCapacity']).toEqual(1);
             done();
         });
     });
@@ -76,8 +76,8 @@ describe('DynamoDBBuilder', () => {
                 .build();
 
             // THEN
-            expect(dynamoDbRepository.tableName).not.toBeNull();
-            expect(dynamoDbRepository.tableName).toEqual('toto');
+            expect(dynamoDbRepository['tableName']).not.toBeNull();
+            expect(dynamoDbRepository['tableName']).toEqual('toto');
             done();
         });
     });
@@ -93,8 +93,8 @@ describe('DynamoDBBuilder', () => {
                 .build();
 
             // THEN
-            expect(dynamoDbRepository.keyName).not.toBeNull();
-            expect(dynamoDbRepository.keyName).toEqual('myKey');
+            expect(dynamoDbRepository['keyName']).not.toBeNull();
+            expect(dynamoDbRepository['keyName']).toEqual('myKey');
             done();
         });
     });
@@ -110,8 +110,8 @@ describe('DynamoDBBuilder', () => {
                 .build();
 
             // THEN
-            expect(dynamoDbRepository.readCapacity).not.toBeNull();
-            expect(dynamoDbRepository.readCapacity).toEqual(12);
+            expect(dynamoDbRepository['readCapacity']).not.toBeNull();
+            expect(dynamoDbRepository['readCapacity']).toEqual(12);
             done();
         });
     });
@@ -127,8 +127,8 @@ describe('DynamoDBBuilder', () => {
                 .build();
 
             // THEN
-            expect(dynamoDbRepository.writeCapacity).not.toBeNull();
-            expect(dynamoDbRepository.writeCapacity).toEqual(15);
+            expect(dynamoDbRepository['writeCapacity']).not.toBeNull();
+            expect(dynamoDbRepository['writeCapacity']).toEqual(15);
             done();
         });
     });
