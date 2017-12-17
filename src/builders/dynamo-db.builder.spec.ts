@@ -12,7 +12,7 @@ describe('DynamoDBBuilder', () => {
                 const dynamoDbRepository = new DynamoDbBuilder().build();
                 fail('we should never arrive here because an exception should have happened');
                 done();
-            } catch(exception) {
+            } catch (exception) {
                 // THEN
                 expect(exception).not.toBeNull();
                 expect(exception).toEqual(new Error('Table name is mandatory'));

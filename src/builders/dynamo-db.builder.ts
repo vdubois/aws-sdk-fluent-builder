@@ -5,10 +5,10 @@ import {DynamoDbRepositoryProxy} from '../repositories/dynamo-db.repository.prox
 export class DynamoDbBuilder {
 
     private tableName: string;
-    private keyName: string = 'id';
-    private readCapacity: number = 1;
-    private writeCapacity: number = 1;
-    private mustCreateBeforeUse: boolean = false;
+    private keyName = 'id';
+    private readCapacity = 1;
+    private writeCapacity = 1;
+    private mustCreateBeforeUse = false;
 
     withTableName(tableName: string): DynamoDbBuilder {
         this.tableName = tableName;

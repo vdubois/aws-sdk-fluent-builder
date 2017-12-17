@@ -13,7 +13,7 @@ describe('DynamoDbRepositoryImplementation', () => {
             };
             const mockedDocumentClient = new DocumentClient();
             spyOn(mockedDocumentClient, 'scan').and.returnValue({
-                promise: () => Promise.resolve({Items:[{myProperty: 'myValue'}]})
+                promise: () => Promise.resolve({Items: [{myProperty: 'myValue'}]})
             });
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
 
