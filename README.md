@@ -4,8 +4,9 @@
 
 ## Goal
 
-The goal of this package is to simplify the use of the Javascript AWS SDK. It's a verbose one and sometimes the needs of developers are really simple.
-It was originally created in order to be used within serverless projects, especially for end-to-end testing of AWS lambdas.
+The goal of this package is to simplify the use of the Javascript AWS SDK. AWS SDK node module is a verbose one and sometimes 
+the needs of developers are really simple. It was originally designed in order to be used within serverless projects, 
+especially for end-to-end testing of AWS lambdas.
 
 It's an API based on the use of promises.
 
