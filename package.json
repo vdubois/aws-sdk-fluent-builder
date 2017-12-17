@@ -4,7 +4,25 @@
   "description": "Fluent builder API for AWS SDK",
   "main": "index.ts",
   "scripts": {
-    "test": "ts-node ./spec/runner.ts"
+    "test": "ts-node ./spec/runner.ts",
+    "coverage": "./node_modules/.bin/nyc ./node_modules/.bin/ts-node ./spec/runner.ts"
+  },
+  "nyc": {
+    "extension": [
+      ".ts",
+      ".tsx"
+    ],
+    "exclude": [
+      "**/*.d.ts",
+      "coverage/*.js",
+      "dist/**/*.ts",
+      "dist/**/*.js",
+      "spec/*.ts"
+    ],
+    "reporter": [
+      "html"
+    ],
+    "all": true
   },
   "repository": {
     "type": "git",
@@ -26,9 +44,11 @@
   "devDependencies": {
     "@types/jasmine": "^2.8.2",
     "@types/node": "^8.0.58",
+    "istanbul": "^0.4.5",
     "jasmine": "^2.8.0",
     "jasmine-reporters": "^2.2.1",
     "jasmine-spec-reporter": "^4.2.1",
+    "nyc": "^11.3.0",
     "ts-node": "^4.0.1",
     "tslint": "^5.8.0",
     "typescript": "^2.6.2"
