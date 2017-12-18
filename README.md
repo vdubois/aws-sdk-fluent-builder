@@ -24,3 +24,9 @@ dynamoDbRepository.findAll()
   .then(results => console.log(results));
 ```
 
+## Todos
+
+* Add tslint to travis-ci
+* Add S3 repository
+* Add Cognito repository
+* Add SNS repository
