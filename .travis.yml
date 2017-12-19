@@ -1,6 +1,12 @@
 language: node_js
 node_js:
-  - "6"
+- '6'
 before_script:
-  - node_modules/.bin/tslint -c tslint.json "src/**/*.ts"
-  - node_modules/.bin/tslint -c tslint.json "e2e/**/*.ts"
+- node_modules/.bin/tslint -c tslint.json "src/**/*.ts"
+- node_modules/.bin/tslint -c tslint.json "e2e/**/*.ts"
+after_script:
+- npm run e2e
+env:
+  global:
+  - secure: UWDfyvchze6BezhisnE07gCsYDinB3iQLAkTXx0X7lDsTVJxBKFfPJ41mZznBNzwOmZxa89r6afD0AwDD/xSxNux2RkVQ/dcfWBGUTGrLypEc4R6enahJL/IMNOHcrLAKEAtTnVI6m+7I5MBMIPkbiXoKm/wynzpJ4RnCAVyaQQ02fFtwyVnZrBGV2CvElt/tm+dpmFzAcF46dCEb3iEhkuvT9/MxwP5mDLqQ/fsnBcqQuyXGNnIMKSlO+NiR1YobiCb1hdLxvgU50xjZmffkNflvfZQP6AaGOJDA9NJ+3xoASqjMa5cDKd/J6kPVFKCF++FkKu9jS0BP5o3aib+/4j1+b+37VxvlXyK374ja4Ym5TwGqEsRYwNQyUUc9UFgdAeYOXFEnatEo2ygsIutBNRTDKFqAeYjYr9vivVwGCBtbs7Szo1Txk110E9+A9Z3a+gyiWyepAtLd2B3YrEJ/FhegyCbnxBqUuKg5yKmMo34Q+2T7bHuE04Ap5LPwDYuAnLqAzWhXFcS5TPouLJhxXwCWnIBzZH3RM/GwuDvTC0N6J5XU9QqT82l8laiR0tV02CRBCVfyGoxtC7DGOZR/bmcA7dwGjeK8py/mMyDDFM2+v7L1xImiLY5Vw8/FJWl+Fs4X6OmY9KXIJfL/yqrMOLfsZhbTezuM2luVW9MWjg=
+  - secure: DSY8gXFUvvTTo69nEze1DQQTl2pARHw5e8bGS3MLSiUBrp6LdlTHElYv8GCP6Th+geNTyf8qyAur2yWBsSp2w5Hle/1lwvnq1AAfRk+EyHnJ1XpuMzbuRFDr9dRdwKW1c83vFE0JWJ1gEWmvf8j3wAVyKdf+40jSouTlX9xS9VH/F6j9QQ/T5eBqk0aq4YI87Z0W9Hhpy+nyx9+56X4qIztByZUj6tTTsBM+LX7FH6nxz9a8v8mOvoJhBN13y+0eRqY8cDHHU3XWQNczExeGLtloD1BOGHQ9D1TknazWoDC42+BpmirsVwloOruzHzRKRUqDAGuIrepKXMpVy58r/maZF0IQt0nPC6gOMo/fFkvicve7+VjKD2o9WXn4K5h42I1kTSD8rwnaGigsYHrKFydgmr/ke++UADF+oXpjFBruokDOeneZ3YYCvCui7IYcclVsz53OTK4pTSsRO00bd45JDYvTLvCbQGBWCyRVJe2wKEc/Dd63IfoY6pi7QI1SFFhHr2wtP6YFdHWcUZ5ckGhLXJdCFUCBZjThu2mIwDKQ7Wu1vK9321AR2v8r7oqxJKJpwpa5/jgpS6hkSOd6uUGMXY/dpQ9pXybBFKi92qe+nGQP+dVR2Kn+uBzWAL+v/k4ikP9Le/wdrX2q+BTEu/cAzDEmo/q5wlzwllKOs8M=
