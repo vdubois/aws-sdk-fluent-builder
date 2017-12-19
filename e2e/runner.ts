@@ -1,5 +1,5 @@
-const Jasmine = require('jasmine');
-const jasmineRunner = new Jasmine();
+const JasmineE2E = require('jasmine');
+const jasmineRunnerE2E = new JasmineE2E();
 
-jasmineRunner.loadConfigFile('e2e/jasmine.json');
-jasmineRunner.execute();
+jasmineRunnerE2E.loadConfigFile('e2e/jasmine.json');
+jasmineRunnerE2E.execute();

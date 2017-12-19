@@ -51,10 +51,10 @@ export class DynamoDbRepositoryImplementation implements DynamoDbRepository {
             TableName: this.tableName
         };
         scanParams.ScanFilter = {};
-        /* FIXME scanParams.ScanFilter[field] = {
+        scanParams.ScanFilter[field] = {
             ComparisonOperator: 'EQ',
             AttributeValueList: [value]
-        };*/
+        } as any;
         return this.dynamoDbClient.scan(scanParams)
             .promise()
             .then(queryResult => queryResult.Items);
