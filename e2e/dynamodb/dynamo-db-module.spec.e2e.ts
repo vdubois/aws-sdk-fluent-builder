@@ -5,7 +5,7 @@ import PutItemInput = DocumentClient.PutItemInput;
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
 
-let tableName = 'dynamo-db-module-e2e';
+const tableName = 'dynamo-db-module-e2e';
 
 describe('DynamoDB module', () => {
 
@@ -23,10 +23,10 @@ describe('DynamoDB module', () => {
 
                     // WHEN
                     return dynamoDbRepository.findAll()
-                        .then(result => {
+                        .then(results => {
                             // THEN
-                            expect(result).not.toBeNull();
-                            expect(result).toEqual([{ id: '2', value: 'test 2' }, { id: '1', value: 'test' }]);
+                            expect(results).not.toBeNull();
+                            expect(results).toEqual([{ id: '2', value: 'test 2' }, { id: '1', value: 'test' }]);
                             done();
                         });
                 })
