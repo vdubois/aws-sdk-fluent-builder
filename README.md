@@ -35,7 +35,8 @@ const sns = new SnsBuilder()
 sns.publishMessage({
   type: 'ProductAddedToCart',
   date: '2017-12-20 20:21:35',
-  version: '1'
+  version: '1',
+  ...
 });
 ```
 
