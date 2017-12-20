@@ -206,6 +206,31 @@ describe('DynamoDB module', () => {
                 });
         });
     });
+
+    describe('deleteAll function', () => {
+
+        it('should delete all data from tables', done => {
+            // GIVEN
+            emptyTable()
+                .then(() => insertItem({id: 'c', value: 'myValue'}))
+                .then(() => insertItem({id: 'd', value: 'myValue2'}))
+                // WHEN
+                .then(() => dynamoDbRepository.deleteAll())
+                .then(() => listAll())
+                // THEN
+                .then(results => {
+                    expect(results).not.toBeNull();
+                    expect(results.length).toEqual(0);
+                    expect(results).toEqual([]);
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
+                    done();
+                });
+
+        });
+    });
 });
 
 const emptyTable = (): Promise<any> => {
