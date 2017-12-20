@@ -36,6 +36,9 @@ export class DynamoDbBuilder {
     }
 
     build(): DynamoDbRepository {
+        if (!process.env.AWS_REGION) {
+            throw new Error('AWS_REGION environment variable must be set');
+        }
         if (!this.tableName) {
             throw new Error('Table name is mandatory');
         }

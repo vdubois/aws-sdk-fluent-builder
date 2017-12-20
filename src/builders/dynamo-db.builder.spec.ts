@@ -2,9 +2,13 @@ import {DynamoDbBuilder} from './dynamo-db.builder';
 
 describe('DynamoDBBuilder', () => {
 
+    beforeEach(() => {
+        process.env.AWS_REGION = 'test';
+    });
+
     describe('build function', () => {
 
-        it('should throw an error on build when prerequisites are not met', done => {
+        it('should throw an error on build when table name is not set', done => {
             // GIVEN
 
             // WHEN
@@ -63,6 +67,25 @@ describe('DynamoDBBuilder', () => {
             expect(dynamoDbRepository['readCapacity']).toEqual(1);
             expect(dynamoDbRepository['writeCapacity']).toEqual(1);
             done();
+        });
+
+        it('should throw an error if AWS region is not defined', done => {
+            // GIVEN
+            process.env = {};
+
+            // WHEN
+            try {
+                const dynamoDbRepository = new DynamoDbBuilder()
+                    .withTableName('foo')
+                    .build();
+                fail('Web should never reach here because build function should throw an error when AWS_REGION env variable is not set');
+                done();
+            } catch (exception) {
+                // THEN
+                expect(exception).not.toBeNull();
+                expect(exception.message).toEqual('AWS_REGION environment variable must be set');
+                done();
+            }
         });
     });
 

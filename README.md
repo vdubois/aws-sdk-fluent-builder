@@ -24,9 +24,22 @@ dynamoDbRepository.findAll()
   .then(results => console.log(results));
 ```
 
+### SNS
+
+```js
+const sns = new SnsBuilder()
+  .withTopicName('cartEvents')
+  .createIfNotExists()
+  .build();
+
+sns.publishMessage({
+  type: 'ProductAddedToCart',
+  date: '2017-12-20 20:21:35',
+  version: '1'
+});
+```
+
 ## Todos
 
-* Add tslint to travis-ci
 * Add S3 repository
 * Add Cognito repository
-* Add SNS repository
