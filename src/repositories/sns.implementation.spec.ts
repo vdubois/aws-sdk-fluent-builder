@@ -8,6 +8,9 @@ describe('SnsImplementation', () => {
         it('should call publish function from aws sdk', done => {
             // GIVEN
             const mockedSns = new SNS();
+            spyOn(mockedSns, 'listTopics').and.returnValue({
+                promise: () => Promise.resolve({Topics: [{TopicArn: 'test-arn'}]})
+            });
             spyOn(mockedSns, 'createTopic').and.returnValue({
                 promise: () => Promise.resolve({})
             });
@@ -20,9 +23,13 @@ describe('SnsImplementation', () => {
             sns.publishMessage({test2: 'value2'})
                 .then(() => {
                     // THEN
+                    expect(mockedSns.listTopics).toHaveBeenCalledTimes(1);
                     expect(mockedSns.createTopic).toHaveBeenCalledTimes(0);
                     expect(mockedSns.publish).toHaveBeenCalledTimes(1);
-                    expect(mockedSns.publish).toHaveBeenCalledWith({Message: JSON.stringify({test2: 'value2'})});
+                    expect(mockedSns.publish).toHaveBeenCalledWith({
+                        TopicArn: 'test-arn',
+                        Message: JSON.stringify({test2: 'value2'})
+                    });
                     done();
                 })
                 .catch(exception => {

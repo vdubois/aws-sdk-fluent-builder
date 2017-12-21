@@ -19,6 +19,8 @@
     "exclude": [
       "**/*.d.ts",
       "coverage/*.js",
+      "e2e/*.ts",
+      "e2e/**/*.ts",
       "dist/**/*.ts",
       "dist/**/*.js",
       "src/**/*.spec.ts",

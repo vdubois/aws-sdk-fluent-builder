@@ -8,7 +8,14 @@ export class SnsProxy implements Sns {
     }
 
     createIfNotExists(): Promise<any> {
-        return this.snsClient.createTopic({Name: this.sns.topicName}).promise();
+        return this.snsClient.listTopics().promise()
+            .then(results => {
+                if (results.Topics.some(topic => topic.TopicArn.indexOf(this.sns.topicName) !== -1)) {
+                    return Promise.resolve({});
+                } else {
+                    return this.snsClient.createTopic({Name: this.sns.topicName}).promise();
+                }
+            });
     }
 
     publishMessage(message: object): Promise<any> {

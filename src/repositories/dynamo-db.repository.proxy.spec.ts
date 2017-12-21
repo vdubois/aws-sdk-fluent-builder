@@ -1,19 +1,24 @@
-import {DocumentClient} from 'aws-sdk/clients/dynamodb';
-import {DynamoDbTableCaracteristicsModel} from '../models/dynamo-db-table-caracteristics.model';
+import { DocumentClient } from 'aws-sdk/clients/dynamodb';
+import { DynamoDbTableCaracteristicsModel } from '../models/dynamo-db-table-caracteristics.model';
+import { DynamoDbRepositoryImplementation } from './dynamo-db.repository.implementation';
+import { DynamoDbRepositoryProxy } from './dynamo-db.repository.proxy';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
-import {DynamoDbRepositoryImplementation} from './dynamo-db.repository.implementation';
-import {DynamoDbRepositoryProxy} from './dynamo-db.repository.proxy';
 
 describe('DynamoDbRepositoryProxy', () => {
 
     describe('findAll function', () => {
 
-        it('should return transformed information from aws sdk after calling creation', done => {
+        it('should return transformed information from aws sdk after calling creation and table does not exist', done => {
             // GIVEN
             const caracteristics: DynamoDbTableCaracteristicsModel = {
                 tableName: 'toto'
             };
             const mockedDynamoDb = new DynamoDB();
+            spyOn(mockedDynamoDb, 'listTables').and.returnValues({
+                promise: () => Promise.resolve({TableNames: []})
+            }, {
+                promise: () => Promise.resolve({TableNames: ['toto']})
+            });
             spyOn(mockedDynamoDb, 'createTable').and.returnValue({
                 promise: () => Promise.resolve({})
             });
@@ -23,7 +28,6 @@ describe('DynamoDbRepositoryProxy', () => {
             });
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
             const dynamoDbRepositoryProxy = new DynamoDbRepositoryProxy(dynamoDbRepositoryImplementation, mockedDynamoDb);
-            spyOn(dynamoDbRepositoryProxy, 'createIfNotExists').and.returnValue(Promise.resolve());
 
             // WHEN
             dynamoDbRepositoryProxy.findAll()
@@ -31,7 +35,47 @@ describe('DynamoDbRepositoryProxy', () => {
                     // THEN
                     expect(result).not.toBeNull();
                     expect(result).toEqual([{myProperty: 'myValue'}]);
-                    expect(dynamoDbRepositoryProxy.createIfNotExists).toHaveBeenCalled();
+                    expect(mockedDynamoDb.listTables).toHaveBeenCalledTimes(1);
+                    expect(mockedDynamoDb.createTable).toHaveBeenCalledTimes(1);
+                    expect(mockedDocumentClient.scan).toHaveBeenCalledTimes(1);
+                    expect(mockedDocumentClient.scan).toHaveBeenCalledWith({TableName: 'toto'});
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
+                    done();
+                });
+        });
+
+        it('should return transformed information from aws sdk after calling creation and table does exist', done => {
+            // GIVEN
+            const caracteristics: DynamoDbTableCaracteristicsModel = {
+                tableName: 'toto'
+            };
+            const mockedDynamoDb = new DynamoDB();
+            spyOn(mockedDynamoDb, 'listTables').and.returnValue({
+                promise: () => Promise.resolve({TableNames: ['toto']})
+            });
+            spyOn(mockedDynamoDb, 'createTable').and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            const mockedDocumentClient = new DocumentClient();
+            spyOn(mockedDocumentClient, 'scan').and.returnValue({
+                promise: () => Promise.resolve({Items: [{myProperty: 'myValue'}]})
+            });
+            const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
+            const dynamoDbRepositoryProxy = new DynamoDbRepositoryProxy(dynamoDbRepositoryImplementation, mockedDynamoDb);
+
+            // WHEN
+            dynamoDbRepositoryProxy.findAll()
+                .then(result => {
+                    // THEN
+                    expect(result).not.toBeNull();
+                    expect(result).toEqual([{myProperty: 'myValue'}]);
+                    expect(mockedDynamoDb.listTables).toHaveBeenCalledTimes(1);
+                    expect(mockedDynamoDb.createTable).toHaveBeenCalledTimes(0);
+                    expect(mockedDocumentClient.scan).toHaveBeenCalledTimes(1);
+                    expect(mockedDocumentClient.scan).toHaveBeenCalledWith({TableName: 'toto'});
                     done();
                 })
                 .catch(exception => {
