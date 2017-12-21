@@ -23,6 +23,7 @@ describe('DynamoDbRepositoryProxy', () => {
             });
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
             const dynamoDbRepositoryProxy = new DynamoDbRepositoryProxy(dynamoDbRepositoryImplementation, mockedDynamoDb);
+            spyOn(dynamoDbRepositoryProxy, 'createIfNotExists').and.returnValue(Promise.resolve());
 
             // WHEN
             dynamoDbRepositoryProxy.findAll()
@@ -30,7 +31,7 @@ describe('DynamoDbRepositoryProxy', () => {
                     // THEN
                     expect(result).not.toBeNull();
                     expect(result).toEqual([{myProperty: 'myValue'}]);
-                    expect(mockedDynamoDb.createTable).toHaveBeenCalled();
+                    expect(dynamoDbRepositoryProxy.createIfNotExists).toHaveBeenCalled();
                     done();
                 })
                 .catch(exception => {
@@ -57,6 +58,7 @@ describe('DynamoDbRepositoryProxy', () => {
             });
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
             const dynamoDbRepositoryProxy = new DynamoDbRepositoryProxy(dynamoDbRepositoryImplementation, mockedDynamoDb);
+            spyOn(dynamoDbRepositoryProxy, 'createIfNotExists').and.returnValue(Promise.resolve());
 
             // WHEN
             dynamoDbRepositoryProxy.findById('3')
@@ -64,7 +66,7 @@ describe('DynamoDbRepositoryProxy', () => {
                     // THEN
                     expect(result).not.toBeNull();
                     expect(result).toEqual({myProperty: 'myValue'});
-                    expect(mockedDynamoDb.createTable).toHaveBeenCalled();
+                    expect(dynamoDbRepositoryProxy.createIfNotExists).toHaveBeenCalled();
                     done();
                 })
                 .catch(exception => {
@@ -91,6 +93,7 @@ describe('DynamoDbRepositoryProxy', () => {
             });
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
             const dynamoDbRepositoryProxy = new DynamoDbRepositoryProxy(dynamoDbRepositoryImplementation, mockedDynamoDb);
+            spyOn(dynamoDbRepositoryProxy, 'createIfNotExists').and.returnValue(Promise.resolve());
 
             // WHEN
             dynamoDbRepositoryProxy.findBy('field', 'value')
@@ -98,7 +101,7 @@ describe('DynamoDbRepositoryProxy', () => {
                     // THEN
                     expect(result).not.toBeNull();
                     expect(result).toEqual([{myProperty: 'myValue'}]);
-                    expect(mockedDynamoDb.createTable).toHaveBeenCalled();
+                    expect(dynamoDbRepositoryProxy.createIfNotExists).toHaveBeenCalled();
                     done();
                 })
                 .catch(exception => {
@@ -125,13 +128,14 @@ describe('DynamoDbRepositoryProxy', () => {
             });
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
             const dynamoDbRepositoryProxy = new DynamoDbRepositoryProxy(dynamoDbRepositoryImplementation, mockedDynamoDb);
+            spyOn(dynamoDbRepositoryProxy, 'createIfNotExists').and.returnValue(Promise.resolve());
 
             // WHEN
             dynamoDbRepositoryProxy.save({myField: 'myValue'})
                 .then(result => {
                     // THEN
                     expect(result).not.toBeNull();
-                    expect(mockedDynamoDb.createTable).toHaveBeenCalled();
+                    expect(dynamoDbRepositoryProxy.createIfNotExists).toHaveBeenCalled();
                     expect(mockedDocumentClient.put).toHaveBeenCalledWith({
                         TableName: 'toto',
                         Item: {
@@ -165,13 +169,14 @@ describe('DynamoDbRepositoryProxy', () => {
             });
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
             const dynamoDbRepositoryProxy = new DynamoDbRepositoryProxy(dynamoDbRepositoryImplementation, mockedDynamoDb);
+            spyOn(dynamoDbRepositoryProxy, 'createIfNotExists').and.returnValue(Promise.resolve());
 
             // WHEN
             dynamoDbRepositoryProxy.deleteById('2')
                 .then(result => {
                     // THEN
                     expect(result).not.toBeNull();
-                    expect(mockedDynamoDb.createTable).toHaveBeenCalled();
+                    expect(dynamoDbRepositoryProxy.createIfNotExists).toHaveBeenCalled();
                     expect(mockedDocumentClient.delete).toHaveBeenCalledWith({
                         TableName: 'toto',
                         Key: {
@@ -218,13 +223,14 @@ describe('DynamoDbRepositoryProxy', () => {
             });
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
             const dynamoDbRepositoryProxy = new DynamoDbRepositoryProxy(dynamoDbRepositoryImplementation, mockedDynamoDb);
+            spyOn(dynamoDbRepositoryProxy, 'createIfNotExists').and.returnValue(Promise.resolve());
 
             // WHEN
             dynamoDbRepositoryProxy.deleteAll()
                 .then(result => {
                     // THEN
                     expect(result).not.toBeNull();
-                    expect(mockedDynamoDb.createTable).toHaveBeenCalled();
+                    expect(dynamoDbRepositoryProxy.createIfNotExists).toHaveBeenCalled();
                     expect(mockedDocumentClient.delete).toHaveBeenCalledTimes(2);
                     done();
                 })
