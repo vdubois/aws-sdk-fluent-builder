@@ -1,6 +1,6 @@
 {
   "name": "aws-sdk-fluent-builder",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Fluent builder API for AWS SDK",
   "main": "index.ts",
   "scripts": {
