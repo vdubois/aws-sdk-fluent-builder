@@ -28,7 +28,7 @@ describe('DynamoDB module', () => {
                         // THEN
                         expect(results).not.toBeNull();
                         done();
-                    })
+                    });
             } catch (exception) {
                 fail(exception);
                 done();
