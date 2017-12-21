@@ -26,7 +26,14 @@ export class DynamoDbRepositoryProxy implements DynamoDbRepository {
                 WriteCapacityUnits: this.dynamoDbRepository.writeCapacity
             }
         };
-        return this.dynamoDbClient.createTable(createTableParams).promise();
+        return this.dynamoDbClient.listTables().promise()
+            .then(results => {
+                if (results.TableNames.some(name => this.dynamoDbRepository.tableName === name)) {
+                    return Promise.resolve({});
+                } else {
+                    return this.dynamoDbClient.createTable(createTableParams).promise();
+                }
+            });
     }
 
     findAll(): Promise<Array<any>> {

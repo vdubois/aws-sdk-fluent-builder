@@ -5,8 +5,8 @@
   "main": "index.ts",
   "scripts": {
     "test": "ts-node ./spec/runner.ts",
-    "e2e-prerequisite": "aws dynamodb create-table --table-name dynamo-db-module-e2e --attribute-definitions AttributeName=id,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 --query TableDescription.TableArn --output text --region eu-west-1",
-    "e2e": "ts-node ./e2e/runner.ts",
+    "e2e-prerequisite": "aws dynamodb create-table --table-name dynamo-db-module-e2e --attribute-definitions AttributeName=id,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 --query TableDescription.TableArn --output text --region eu-west-1 && aws sns create-topic --name sns-module-e2e --region eu-west-1",
+    "e2e": "AWS_REGION=eu-west-1 ts-node ./e2e/runner.ts",
     "coverage": "./node_modules/.bin/nyc ./node_modules/.bin/ts-node ./spec/runner.ts",
     "lint": "node_modules/.bin/tslint -c tslint.json 'src/**/*.ts' && node_modules/.bin/tslint -c tslint.json 'e2e/**/*.ts'"
   },

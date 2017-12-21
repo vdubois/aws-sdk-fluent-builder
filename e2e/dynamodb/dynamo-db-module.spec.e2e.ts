@@ -12,6 +12,30 @@ const dynamoDbRepository = new DynamoDbBuilder()
 
 describe('DynamoDB module', () => {
 
+    describe('createIfNotExists function', () => {
+
+        it('should not throw an error if table already exists', done => {
+            // GIVEN
+            const alreadyExistingTableRepository = new DynamoDbBuilder()
+                .withTableName(tableName)
+                .createIfNotExists()
+                .build();
+
+            // WHEN
+            try {
+                alreadyExistingTableRepository.findAll()
+                    .then(results => {
+                        // THEN
+                        expect(results).not.toBeNull();
+                        done();
+                    })
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
+        });
+    });
+
     describe('findAll function', () => {
 
         it('should return all table objects', done => {
