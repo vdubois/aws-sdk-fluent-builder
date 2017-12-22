@@ -4,8 +4,8 @@
 
 ## Goal
 
-The goal of this package is to simplify the use of the Javascript AWS SDK. AWS SDK node module is a verbose one and sometimes 
-the needs of developers are really simple. It was originally designed in order to be used within serverless projects, 
+The goal of this package is to simplify the use of the Javascript AWS SDK. AWS SDK node module is a verbose one and sometimes
+the needs of developers are really simple. It was originally designed in order to be used within serverless projects,
 especially for end-to-end testing of AWS lambdas.
 
 It's an API based on the use of promises.
@@ -38,6 +38,41 @@ sns.publishMessage({
   version: '1',
   ...
 });
+```
+
+### S3
+
+```js
+const configurationService = new S3Builder()
+  .withBucketName('myBucket')
+  .createIfNotExists()
+  .asConfigurationService()
+  .build();
+
+configurationService.getKey('configurationKey')
+  .then(configurationValue => console.log(configurationValue));
+```
+
+```js
+const storageService = new S3Builder()
+  .withBucketName('myBucket')
+  .createIfNotExists()
+  .asStorageService()
+  .build();
+
+storageService.listFiles()
+  .then(files => console.console.log(files));
+```
+
+```js
+const hostingService = new S3Builder()
+  .withBucketName('myBucket')
+  .createIfNotExists()
+  .asHostingService()
+  .build();
+
+hostingService.uploadFilesFromDirectory('/directory/path')
+  .then(result => console.log(result));
 ```
 
 ## Todos
