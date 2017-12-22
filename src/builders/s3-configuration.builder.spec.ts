@@ -19,4 +19,23 @@ describe('S3ConfigurationBuilder', () => {
             done();
         });
     });
+
+    describe('withSourceFileName function', () => {
+
+        it('should store source file name', done => {
+            // GIVEN
+
+            // WHEN
+            const configurationService = new S3Builder()
+                .withBucketName('toto')
+                .asConfigurationService()
+                .withSourceFileName('myConfig.json')
+                .build();
+
+            // THEN
+            expect(configurationService).not.toBeNull();
+            expect(configurationService['fileName']).toEqual('myConfig.json');
+            done();
+        });
+    });
 });

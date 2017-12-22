@@ -49,7 +49,7 @@ const configurationService = new S3Builder()
   .asConfigurationService()
   .build();
 
-configurationService.getKey('configurationKey')
+configurationService.get('configurationKey')
   .then(configurationValue => console.log(configurationValue));
 ```
 
