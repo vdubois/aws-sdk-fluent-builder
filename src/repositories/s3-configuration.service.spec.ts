@@ -73,5 +73,101 @@ describe('S3ConfigurationService', () => {
                     done();
                 });
         });
+
+        it('should throw an error if file does not exist in bucket', done => {
+            // GIVEN
+            const mockedS3 = new S3();
+            spyOn(mockedS3, 'getObject').and.returnValue({
+                promise: () => Promise.reject({})
+            });
+            const configurationService = new S3ConfigurationService('toto', 'config.json', mockedS3);
+
+            // WHEN
+            configurationService.get('key')
+                .then(() => configurationService.get('key'))
+                .then(value => {
+                    // THEN
+                    fail('we should never reach here because config file does not exist in bucket');
+                    done();
+                })
+                .catch(exception => {
+                    expect(exception).not.toBeNull();
+                    expect(exception.message).toEqual('config.json file does not exist in bucket');
+                    done();
+                });
+        });
+
+    });
+
+    describe('all function', () => {
+
+        it('should get all values from configuration', done => {
+            // GIVEN
+            const mockedS3 = new S3();
+            spyOn(mockedS3, 'getObject').and.returnValue({
+                promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({key: 'value', key2: 'value'}))})
+            });
+            const configurationService = new S3ConfigurationService('toto', 'config.json', mockedS3);
+
+            // WHEN
+            configurationService.all()
+                .then(value => {
+                    // THEN
+                    expect(value).not.toBeNull();
+                    expect(value).toEqual({key: 'value', key2: 'value'});
+                    expect(mockedS3.getObject).toHaveBeenCalledTimes(1);
+                    done();
+                })
+                .catch(exception => {
+                    expect(exception).toBeNull();
+                    done();
+                });
+        });
+
+        it('should load remote file just one time when requesting configuration', done => {
+            // GIVEN
+            const mockedS3 = new S3();
+            spyOn(mockedS3, 'getObject').and.returnValue({
+                promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({key: 'value'}))})
+            });
+            const configurationService = new S3ConfigurationService('toto', 'config.json', mockedS3);
+
+            // WHEN
+            configurationService.all()
+                .then(() => configurationService.all())
+                .then(value => {
+                    // THEN
+                    expect(value).not.toBeNull();
+                    expect(mockedS3.getObject).toHaveBeenCalledTimes(1);
+                    done();
+                })
+                .catch(exception => {
+                    expect(exception).toBeNull();
+                    done();
+                });
+        });
+
+        it('should throw an error if file does not exist in bucket', done => {
+            // GIVEN
+            const mockedS3 = new S3();
+            spyOn(mockedS3, 'getObject').and.returnValue({
+                promise: () => Promise.reject({})
+            });
+            const configurationService = new S3ConfigurationService('toto', 'config.json', mockedS3);
+
+            // WHEN
+            configurationService.all()
+                .then(() => configurationService.all())
+                .then(value => {
+                    // THEN
+                    fail('we should never reach here because config file does not exist in bucket');
+                    done();
+                })
+                .catch(exception => {
+                    expect(exception).not.toBeNull();
+                    expect(exception.message).toEqual('config.json file does not exist in bucket');
+                    done();
+                });
+        });
     });
 });

@@ -20,6 +20,10 @@ export class S3ConfigurationService {
             });
     }
 
+    all(): Promise<any> {
+        return this.loadConfiguration();
+    }
+
     private loadConfiguration(): Promise<any> {
         if (this.configuration) {
             return Promise.resolve(this.configuration);
