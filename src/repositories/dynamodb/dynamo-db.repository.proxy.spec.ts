@@ -1,5 +1,5 @@
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
-import { DynamoDbTableCaracteristicsModel } from '../models/dynamo-db-table-caracteristics.model';
+import { DynamoDbTableCaracteristicsModel } from '../../models/dynamo-db-table-caracteristics.model';
 import { DynamoDbRepositoryImplementation } from './dynamo-db.repository.implementation';
 import { DynamoDbRepositoryProxy } from './dynamo-db.repository.proxy';
 import DynamoDB = require('aws-sdk/clients/dynamodb');

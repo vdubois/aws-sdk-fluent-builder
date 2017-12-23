@@ -1,6 +1,6 @@
-import {DynamoDbRepository} from '../repositories/dynamo-db.repository';
-import {DynamoDbRepositoryImplementation} from '../repositories/dynamo-db.repository.implementation';
-import {DynamoDbRepositoryProxy} from '../repositories/dynamo-db.repository.proxy';
+import {DynamoDbRepository} from '../../repositories/dynamodb/dynamo-db.repository';
+import {DynamoDbRepositoryImplementation} from '../../repositories/dynamodb/dynamo-db.repository.implementation';
+import {DynamoDbRepositoryProxy} from '../../repositories/dynamodb/dynamo-db.repository.proxy';
 
 export class DynamoDbBuilder {
 

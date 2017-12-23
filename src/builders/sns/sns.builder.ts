@@ -1,6 +1,6 @@
-import { Sns } from '../repositories/sns';
-import { SnsProxy } from '../repositories/sns.proxy';
-import { SnsImplementation } from '../repositories/sns.implementation';
+import { Sns } from '../../repositories/sns/sns';
+import { SnsProxy } from '../../repositories/sns/sns.proxy';
+import { SnsImplementation } from '../../repositories/sns/sns.implementation';
 
 export class SnsBuilder {
 

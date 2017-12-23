@@ -1,6 +1,6 @@
-import { S3ConfigurationBuilder } from './s3-configuration.builder';
-import { S3StorageBuilder } from './s3-storage.builder';
-import { S3HostingBuilder } from './s3-hosting.builder';
+import { S3ConfigurationBuilder } from './configuration/s3-configuration.builder';
+import { S3StorageBuilder } from './storage/s3-storage.builder';
+import { S3HostingBuilder } from './hosting/s3-hosting.builder';
 
 export class S3Builder {
 

@@ -1,6 +1,6 @@
 import {DynamoDbRepository} from './dynamo-db.repository';
 import {DocumentClient, ScanInput} from 'aws-sdk/clients/dynamodb';
-import {DynamoDbTableCaracteristicsModel} from '../models/dynamo-db-table-caracteristics.model';
+import {DynamoDbTableCaracteristicsModel} from '../../models/dynamo-db-table-caracteristics.model';
 import PutItemInput = DocumentClient.PutItemInput;
 
 export class DynamoDbRepositoryImplementation implements DynamoDbRepository {

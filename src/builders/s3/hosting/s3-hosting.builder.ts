@@ -1,4 +1,4 @@
-import { S3HostingService } from '../repositories/s3-hosting.service';
+import { S3HostingService } from '../../../repositories/s3/s3-hosting.service';
 
 export class S3HostingBuilder {
 

@@ -1,4 +1,4 @@
-import { DynamoDbBuilder } from '../../src/builders/dynamo-db.builder';
+import { DynamoDbBuilder } from '../../src/builders/dynamodb/dynamo-db.builder';
 import { DeleteTableInput, DocumentClient } from 'aws-sdk/clients/dynamodb';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 import PutItemInput = DocumentClient.PutItemInput;

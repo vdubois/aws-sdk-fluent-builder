@@ -1,4 +1,4 @@
-import { S3StorageService } from '../repositories/s3-storage.service';
+import { S3StorageService } from '../../../repositories/s3/s3-storage.service';
 
 export class S3StorageBuilder {
 

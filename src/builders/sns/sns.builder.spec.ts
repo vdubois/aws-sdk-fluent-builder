@@ -1,5 +1,5 @@
 import { SnsBuilder } from './sns.builder';
-import { DynamoDbBuilder } from './dynamo-db.builder';
+import { DynamoDbBuilder } from '../dynamodb/dynamo-db.builder';
 
 describe('SNSBuilder', () => {
 

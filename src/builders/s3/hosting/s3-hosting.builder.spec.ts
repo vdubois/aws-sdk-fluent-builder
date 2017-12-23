@@ -1,4 +1,4 @@
-import { S3Builder } from './s3.builder';
+import { S3Builder } from '../s3.builder';
 
 describe('S3HostingBuilder', () => {
 

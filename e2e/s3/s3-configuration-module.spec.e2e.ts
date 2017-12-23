@@ -1,4 +1,4 @@
-import { S3Builder } from '../../src/builders/s3.builder';
+import { S3Builder } from '../../src/builders/s3/s3.builder';
 import S3 = require('aws-sdk/clients/s3');
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;

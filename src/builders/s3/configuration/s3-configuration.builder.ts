@@ -1,4 +1,4 @@
-import { S3ConfigurationService } from '../repositories/s3-configuration.service';
+import { S3ConfigurationService } from '../../../repositories/s3/s3-configuration.service';
 
 export class S3ConfigurationBuilder {
 
