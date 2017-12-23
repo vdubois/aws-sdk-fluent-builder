@@ -33,6 +33,9 @@ export class S3ConfigurationService {
                 .then(result => {
                     this.configuration = JSON.parse(result.Body.toString());
                     return this.configuration;
+                })
+                .catch(exception => {
+                    throw new Error(`${this.fileName} file does not exist in bucket`);
                 });
         }
     }

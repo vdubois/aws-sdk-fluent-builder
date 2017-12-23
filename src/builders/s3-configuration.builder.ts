@@ -2,7 +2,9 @@ import { S3ConfigurationService } from '../repositories/s3-configuration.service
 
 export class S3ConfigurationBuilder {
 
-    constructor(private bucketName: string, private sourceFileName = 'config.json') {
+    private sourceFileName = 'config.json';
+
+    constructor(private bucketName: string) {
 
     }
 
