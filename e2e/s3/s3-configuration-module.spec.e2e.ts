@@ -76,6 +76,54 @@ describe('S3 Configuration module', () => {
                     done();
                 });
         });
+
+        it('should get an overriden config value if configuration was overriden with an object', done => {
+            // GIVEN
+            const configurationService = new S3Builder()
+                .withBucketName(bucketName)
+                .createIfNotExists()
+                .asConfigurationService()
+                .withContents({test: 'overriden value'})
+                .build();
+            emptyBucket()
+                .then(() => uploadConfigFile())
+                // WHEN
+                .then(() => configurationService.get('test'))
+                .then(value => {
+                    // THEN
+                    expect(value).not.toBeNull();
+                    expect(value).toEqual('overriden value');
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
+                    done();
+                });
+        });
+
+        it('should get an overriden config value if configuration was overriden with a file', done => {
+            // GIVEN
+            const configurationService = new S3Builder()
+                .withBucketName(bucketName)
+                .createIfNotExists()
+                .asConfigurationService()
+                .withFileContents(__dirname + '/../data/config.json')
+                .build();
+            emptyBucket()
+                .then(() => uploadConfigFile())
+                // WHEN
+                .then(() => configurationService.get('test'))
+                .then(value => {
+                    // THEN
+                    expect(value).not.toBeNull();
+                    expect(value).toEqual('sample');
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
+                    done();
+                });
+        });
     });
 
     describe('all function', () => {
@@ -117,6 +165,54 @@ describe('S3 Configuration module', () => {
                     // THEN
                     expect(value).not.toBeNull();
                     expect(value).toEqual({test: 'value', test2: 'value2'});
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
+                    done();
+                });
+        });
+
+        it('should get overriden config values if configuration was overriden with an object', done => {
+            // GIVEN
+            const configurationService = new S3Builder()
+                .withBucketName(bucketName)
+                .createIfNotExists()
+                .asConfigurationService()
+                .withContents({test: 'overriden value'})
+                .build();
+            emptyBucket()
+                .then(() => uploadConfigFile())
+                // WHEN
+                .then(() => configurationService.all())
+                .then(values => {
+                    // THEN
+                    expect(values).not.toBeNull();
+                    expect(values).toEqual({test: 'overriden value'});
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
+                    done();
+                });
+        });
+
+        it('should get overriden config values if configuration was overriden with a file', done => {
+            // GIVEN
+            const configurationService = new S3Builder()
+                .withBucketName(bucketName)
+                .createIfNotExists()
+                .asConfigurationService()
+                .withFileContents(__dirname + '/../data/config.json')
+                .build();
+            emptyBucket()
+                .then(() => uploadConfigFile())
+                // WHEN
+                .then(() => configurationService.all())
+                .then(value => {
+                    // THEN
+                    expect(value).not.toBeNull();
+                    expect(value).toEqual({test: 'sample', test2: false});
                     done();
                 })
                 .catch(exception => {
