@@ -11,7 +11,8 @@ describe('S3ConfigurationService', () => {
             spyOn(mockedS3, 'getObject').and.returnValue({
                 promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({key: 'value'}))})
             });
-            const configurationService = new S3ConfigurationService('toto', 'config.json', mockedS3);
+            const configurationService = new S3ConfigurationService(
+                'toto', 'config.json', undefined, mockedS3);
 
             // WHEN
             configurationService.get('key')
@@ -28,13 +29,46 @@ describe('S3ConfigurationService', () => {
                 });
         });
 
+        it('should get a value from an overriden configuration', done => {
+            // GIVEN
+            const mockedS3 = new S3();
+            spyOn(mockedS3, 'getObject').and.returnValue({
+                promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({key: 'value'}))})
+            });
+            spyOn(mockedS3, 'upload').and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            const configurationService = new S3ConfigurationService(
+                'toto', 'config.json', {we: `don't care`}, mockedS3);
+
+            // WHEN
+            configurationService.get('key')
+                .then(value => {
+                    // THEN
+                    expect(value).not.toBeNull();
+                    expect(value).toEqual('value');
+                    expect(mockedS3.getObject).toHaveBeenCalledTimes(1);
+                    expect(mockedS3.upload).toHaveBeenCalledTimes(1);
+                    expect(mockedS3.upload).toHaveBeenCalledWith({
+                        Bucket: 'toto',
+                        Key: 'config.json',
+                        Body: JSON.stringify({we: `don't care`}, null, 2)
+                    });
+                    done();
+                })
+                .catch(exception => {
+                    expect(exception).toBeNull();
+                    done();
+                });
+        });
+
         it('should throw an error if a key does not exist', done => {
             // GIVEN
             const mockedS3 = new S3();
             spyOn(mockedS3, 'getObject').and.returnValue({
                 promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({}))})
             });
-            const configurationService = new S3ConfigurationService('toto', 'config.json', mockedS3);
+            const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, mockedS3);
 
             // WHEN
             configurationService.get('key')
@@ -56,7 +90,7 @@ describe('S3ConfigurationService', () => {
             spyOn(mockedS3, 'getObject').and.returnValue({
                 promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({key: 'value'}))})
             });
-            const configurationService = new S3ConfigurationService('toto', 'config.json', mockedS3);
+            const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, mockedS3);
 
             // WHEN
             configurationService.get('key')
@@ -80,7 +114,7 @@ describe('S3ConfigurationService', () => {
             spyOn(mockedS3, 'getObject').and.returnValue({
                 promise: () => Promise.reject({})
             });
-            const configurationService = new S3ConfigurationService('toto', 'config.json', mockedS3);
+            const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, mockedS3);
 
             // WHEN
             configurationService.get('key')
@@ -107,7 +141,7 @@ describe('S3ConfigurationService', () => {
             spyOn(mockedS3, 'getObject').and.returnValue({
                 promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({key: 'value', key2: 'value'}))})
             });
-            const configurationService = new S3ConfigurationService('toto', 'config.json', mockedS3);
+            const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, mockedS3);
 
             // WHEN
             configurationService.all()
@@ -124,13 +158,45 @@ describe('S3ConfigurationService', () => {
                 });
         });
 
+        it('should get all value from an overriden configuration', done => {
+            // GIVEN
+            const mockedS3 = new S3();
+            spyOn(mockedS3, 'getObject').and.returnValue({
+                promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({key: 'value'}))})
+            });
+            spyOn(mockedS3, 'upload').and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            const configurationService = new S3ConfigurationService(
+                'toto', 'config.json', {we: `don't care`}, mockedS3);
+
+            // WHEN
+            configurationService.all()
+                .then(values => {
+                    // THEN
+                    expect(values).not.toBeNull();
+                    expect(mockedS3.getObject).toHaveBeenCalledTimes(1);
+                    expect(mockedS3.upload).toHaveBeenCalledTimes(1);
+                    expect(mockedS3.upload).toHaveBeenCalledWith({
+                        Bucket: 'toto',
+                        Key: 'config.json',
+                        Body: JSON.stringify({we: `don't care`}, null, 2)
+                    });
+                    done();
+                })
+                .catch(exception => {
+                    expect(exception).toBeNull();
+                    done();
+                });
+        });
+
         it('should load remote file just one time when requesting configuration', done => {
             // GIVEN
             const mockedS3 = new S3();
             spyOn(mockedS3, 'getObject').and.returnValue({
                 promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({key: 'value'}))})
             });
-            const configurationService = new S3ConfigurationService('toto', 'config.json', mockedS3);
+            const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, mockedS3);
 
             // WHEN
             configurationService.all()
@@ -153,7 +219,7 @@ describe('S3ConfigurationService', () => {
             spyOn(mockedS3, 'getObject').and.returnValue({
                 promise: () => Promise.reject({})
             });
-            const configurationService = new S3ConfigurationService('toto', 'config.json', mockedS3);
+            const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, mockedS3);
 
             // WHEN
             configurationService.all()
