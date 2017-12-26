@@ -66,6 +66,24 @@ describe('S3 Storage module', () => {
                     done();
                 });
         });
+
+        it('should get no files if bucket is not empty with a non matching predicate', done => {
+            // GIVEN
+            emptyBucket()
+                .then(() => uploadAllFiles())
+                // WHEN
+                .then(() => storageService.listFiles(filename => filename.endsWith('.ts')))
+                .then(files => {
+                    // THEN
+                    expect(files).not.toBeNull();
+                    expect(files).toEqual([]);
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
+                    done();
+                });
+        });
     });
 });
 
