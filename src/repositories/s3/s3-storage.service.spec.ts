@@ -101,17 +101,48 @@ describe('S3StorageService', () => {
 
     describe('readFile function', () => {
 
-        xit('should load file contents when', done => {
+        it('should load file contents when load file from aws sdk works fine', done => {
             // GIVEN
             const mockedS3 = new S3();
-            spyOn(mockedS3, 'listObjects').and.returnValue({
-                promise: () => Promise.resolve({Contents: [{Key: 'test.file'}, {Key: 'test2.txt'}]} as ListObjectsOutput)
+            spyOn(mockedS3, 'getObject').and.returnValue({
+                promise: () => Promise.resolve({Body: 'content'})
             });
+            const storageService = new S3StorageService('toto', mockedS3);
 
             // WHEN
-            // sto
-            // THEN
+            storageService.readFile('test.txt')
+                .then(content => {
+                    // THEN
+                    expect(content).not.toBeNull();
+                    expect(content).toEqual('content');
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
+                    done();
+                });
+        });
 
+        it('should throw an error when load file from aws sdk thrown an error', done => {
+            // GIVEN
+            const mockedS3 = new S3();
+            spyOn(mockedS3, 'getObject').and.returnValue({
+                promise: () => Promise.reject('read error')
+            });
+            const storageService = new S3StorageService('toto', mockedS3);
+
+            // WHEN
+            storageService.readFile('test.txt')
+                .then(content => {
+                    fail('we should not reach here because an error must have been thrown by aws sdk');
+                    done();
+                })
+                .catch(exception => {
+                    // THEN
+                    expect(exception).not.toBeNull();
+                    expect(exception.message).toEqual('readFile function : read error');
+                    done();
+                });
         });
     });
 });

@@ -10,7 +10,7 @@ export class S3StorageService {
             .then(files => files.Contents.map(file => file.Key))
             .then(filesNames => filesNames.filter(predicate))
             .catch(exception => {
-                throw new Error('listFiles function : ' + exception);
+                throw new Error(`listFiles function : ${exception}`);
             });
     }
 
@@ -18,7 +18,11 @@ export class S3StorageService {
         return this.s3Client.getObject({
             Bucket: this.bucketName,
             Key: filePath
-        }).promise().then(file => file.Body);
+        }).promise()
+            .then(file => file.Body)
+            .catch(exception => {
+                throw new Error(`readFile function : ${exception}`);
+            });
     }
 
     writeFile(filePath: string, fileContent: Buffer): Promise<any> {
