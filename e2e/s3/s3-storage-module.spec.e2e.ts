@@ -10,7 +10,7 @@ const storageService = new S3Builder()
     .asStorageService()
     .build();
 
-fdescribe('S3 Storage module', () => {
+describe('S3 Storage module', () => {
 
     describe('listFiles function', () => {
 
