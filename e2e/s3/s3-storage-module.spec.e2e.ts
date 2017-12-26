@@ -85,6 +85,44 @@ describe('S3 Storage module', () => {
                 });
         });
     });
+
+    describe('readFile function', () => {
+
+        it('should throw an error if file does not exist in bucket', done => {
+            // GIVEN
+            emptyBucket()
+                // WHEN
+                .then(() => storageService.readFile('test.txt'))
+                .then(() => {
+                    fail('we should never reach here because the file does not exist in bucket');
+                    done();
+                })
+                .catch(exception => {
+                    // THEN
+                    expect(exception).not.toBeNull();
+                    expect(exception.message).toEqual('readFile function : NoSuchKey: The specified key does not exist.');
+                    done();
+                });
+        });
+
+        it('should return file content if file does exist in bucket', done => {
+            // GIVEN
+            emptyBucket()
+                .then(() => uploadAllFiles())
+                // WHEN
+                .then(() => storageService.readFile('test.txt'))
+                .then(fileContent => {
+                    // THEN
+                    expect(fileContent).not.toBeNull();
+                    expect(fileContent).toEqual(new Buffer('sample data'));
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
+                    done();
+                });
+        });
+    });
 });
 
 const emptyBucket = (): Promise<any> => {
