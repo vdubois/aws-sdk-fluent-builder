@@ -73,6 +73,30 @@ describe('S3StorageService', () => {
                     done();
                 });
         });
+
+        it('should throw an error if aws sdk throws an error', done => {
+            // GIVEN
+            const mockedS3 = new S3();
+            spyOn(mockedS3, 'listObjects').and.returnValue({
+                promise: () => Promise.reject('Error when listing files')
+            });
+            const storageService = new S3StorageService('toto', mockedS3);
+
+            // WHEN
+            storageService.listFiles()
+                .then(files => {
+                    fail('we should not reach here because an error must have been thrown by aws sdk');
+                    done();
+                })
+                .catch(exception => {
+                    expect(exception).not.toBeNull();
+                    expect(exception.message).toEqual('listFiles function : Error when listing files');
+                    done();
+                });
+
+            // THEN
+
+        });
     });
 
     describe('readFile function', () => {

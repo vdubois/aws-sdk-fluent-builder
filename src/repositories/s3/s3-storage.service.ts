@@ -8,7 +8,10 @@ export class S3StorageService {
     listFiles(predicate = (file) => true): Promise<any> {
         return this.s3Client.listObjects({Bucket: this.bucketName}).promise()
             .then(files => files.Contents.map(file => file.Key))
-            .then(filesNames => filesNames.filter(predicate));
+            .then(filesNames => filesNames.filter(predicate))
+            .catch(exception => {
+                throw new Error('listFiles function : ' + exception);
+            });
     }
 
     readFile(filePath: string): Promise<any> {
