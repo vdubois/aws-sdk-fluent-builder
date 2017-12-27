@@ -191,4 +191,54 @@ describe('S3StorageService', () => {
                 });
         });
     });
+
+    describe('deleteFile function', () => {
+
+        it('should throw an error if aws sdk throws an error', done => {
+            // GIVEN
+            const mockedS3 = new S3();
+            spyOn(mockedS3, 'deleteObject').and.returnValue({
+                promise: () => Promise.reject('delete error')
+            });
+            const storageService = new S3StorageService('toto', mockedS3);
+
+            // WHEN
+            storageService.deleteFile('test.txt')
+                .then(() => {
+                    fail('we should not reach here because an error must have been thrown by aws sdk');
+                    done();
+                })
+                .catch(exception => {
+                    // THEN
+                    expect(exception).not.toBeNull();
+                    expect(exception.message).toEqual('deleteFile function : delete error');
+                    done();
+                });
+        });
+
+        it('should delete file with a call to aws sdk', done => {
+            // GIVEN
+            const mockedS3 = new S3();
+            spyOn(mockedS3, 'deleteObject').and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            const storageService = new S3StorageService('toto', mockedS3);
+
+            // WHEN
+            storageService.deleteFile('test.txt')
+                .then(() => {
+                    // THEN
+                    expect(mockedS3.deleteObject).toHaveBeenCalledTimes(1);
+                    expect(mockedS3.deleteObject).toHaveBeenCalledWith({
+                        Bucket: 'toto',
+                        Key: 'test.txt'
+                    });
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
+                    done();
+                });
+        });
+    });
 });

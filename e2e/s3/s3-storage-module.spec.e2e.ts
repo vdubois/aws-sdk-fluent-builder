@@ -163,6 +163,42 @@ describe('S3 Storage module', () => {
                 });
         });
     });
+
+    describe('deleteFile function', () => {
+
+        it('should not throw an error if file does not exist in bucket', done => {
+            // GIVEN
+            emptyBucket()
+                // WHEN
+                .then(() => storageService.deleteFile('test.txt'))
+                .then(() => {
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
+                    done();
+                });
+        });
+
+        it('should delete file if file exists in bucket', done => {
+            // GIVEN
+            emptyBucket()
+                .then(() => uploadAllFiles())
+                // WHEN
+                .then(() => storageService.deleteFile('test.txt'))
+                .then(() => listFiles())
+                .then(files => {
+                    // THEN
+                    expect(files).not.toBeNull();
+                    expect(files).toEqual(['sample.txt', 'test.md']);
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
+                    done();
+                });
+        });
+    });
 });
 
 const emptyBucket = (): Promise<any> => {
@@ -194,4 +230,10 @@ const uploadAllFiles = (): Promise<any> => {
 const loadFileContent = (filePath: string): Promise<string> => {
     const s3Client = new S3({ region: process.env.AWS_REGION });
     return s3Client.getObject({Bucket: bucketName, Key: filePath}).promise().then(result => result.Body.toString());
+};
+
+const listFiles = (): Promise<any> => {
+    const s3Client = new S3({ region: process.env.AWS_REGION });
+    return s3Client.listObjects({Bucket: bucketName}).promise()
+        .then(result => result.Contents.map(file => file.Key));
 };

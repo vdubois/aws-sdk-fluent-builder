@@ -40,7 +40,10 @@ export class S3StorageService {
         return this.s3Client.deleteObject({
             Bucket: this.bucketName,
             Key: filePath
-        }).promise();
+        }).promise()
+            .catch(exception => {
+                throw new Error(`deleteFile function : ${exception}`);
+            });
     }
 
     /*mkdir(path: string): Promise<any> {
