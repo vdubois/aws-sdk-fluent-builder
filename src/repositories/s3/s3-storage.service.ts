@@ -30,7 +30,10 @@ export class S3StorageService {
             Bucket: this.bucketName,
             Key: filePath,
             Body: fileContent
-        }).promise();
+        }).promise()
+            .catch(exception => {
+                throw new Error(`writeFile function : ${exception}`);
+            });
     }
 
     deleteFile(filePath: string): Promise<any> {
@@ -39,4 +42,12 @@ export class S3StorageService {
             Key: filePath
         }).promise();
     }
+
+    /*mkdir(path: string): Promise<any> {
+
+    }
+
+    rmdir(path: string): Promise<any> {
+
+    }*/
 }

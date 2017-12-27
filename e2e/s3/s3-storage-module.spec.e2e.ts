@@ -123,6 +123,46 @@ describe('S3 Storage module', () => {
                 });
         });
     });
+
+    describe('writeFile function', () => {
+
+        it('should override a file if file already exists in bucket', done => {
+            // GIVEN
+            emptyBucket()
+                .then(() => uploadAllFiles())
+                // WHEN
+                .then(() => storageService.writeFile('test.txt', new Buffer('overriden content')))
+                .then(() => loadFileContent('test.txt'))
+                .then(fileContent => {
+                    // THEN
+                    expect(fileContent).not.toBeNull();
+                    expect(fileContent).toEqual('overriden content');
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
+                    done();
+                });
+        });
+
+        it('should write a file if file does not exist in bucket', done => {
+            // GIVEN
+            emptyBucket()
+                // WHEN
+                .then(() => storageService.writeFile('test.txt', new Buffer('written content')))
+                .then(() => loadFileContent('test.txt'))
+                .then(fileContent => {
+                    // THEN
+                    expect(fileContent).not.toBeNull();
+                    expect(fileContent).toEqual('written content');
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
+                    done();
+                });
+        });
+    });
 });
 
 const emptyBucket = (): Promise<any> => {
@@ -149,4 +189,9 @@ const uploadAllFiles = (): Promise<any> => {
             Key: 'test.md',
             Body: 'sample data'
         }).promise());
+};
+
+const loadFileContent = (filePath: string): Promise<string> => {
+    const s3Client = new S3({ region: process.env.AWS_REGION });
+    return s3Client.getObject({Bucket: bucketName, Key: filePath}).promise().then(result => result.Body.toString());
 };

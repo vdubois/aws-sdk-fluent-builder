@@ -79,5 +79,25 @@ describe('S3ConfigurationBuilder', () => {
             expect(configurationService['contents']).toEqual({test: 'sample', test2: false});
             done();
         });
+
+        it('should throw an error if file does not exist', done => {
+            // GIVEN
+
+            // WHEN
+            try {
+                const configurationService = new S3Builder()
+                    .withBucketName('toto')
+                    .asConfigurationService()
+                    .withFileContents('config.json')
+                    .build();
+                fail('we should not reach here because file does not exist');
+                done();
+            } catch (exception) {
+                // THEN
+                expect(exception).not.toBeNull();
+                expect(exception.message).toEqual('File config.json does not exist');
+                done();
+            }
+        });
     });
 });

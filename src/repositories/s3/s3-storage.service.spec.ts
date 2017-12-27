@@ -145,4 +145,50 @@ describe('S3StorageService', () => {
                 });
         });
     });
+
+    describe('writeFile function', () => {
+
+        it('should write file contents when upload from aws sdk works fine', done => {
+            // GIVEN
+            const mockedS3 = new S3();
+            spyOn(mockedS3, 'upload').and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            const storageService = new S3StorageService('toto', mockedS3);
+
+            // WHEN
+            storageService.writeFile('test.txt', new Buffer('content'))
+                .then(result => {
+                    // THEN
+                    expect(result).not.toBeNull();
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
+                    done();
+                });
+        });
+
+        it('should throw an error if aws sdk throws an error', done => {
+            // GIVEN
+            const mockedS3 = new S3();
+            spyOn(mockedS3, 'upload').and.returnValue({
+                promise: () => Promise.reject('write error')
+            });
+            const storageService = new S3StorageService('toto', mockedS3);
+
+            // WHEN
+            storageService.writeFile('path.txt', new Buffer('content'))
+                .then(() => {
+                    fail('we should not reach here because an error must have been thrown by aws sdk');
+                    done();
+                })
+                .catch(exception => {
+                    // THEN
+                    expect(exception).not.toBeNull();
+                    expect(exception.message).toEqual('writeFile function : write error');
+                    done();
+                });
+        });
+    });
 });

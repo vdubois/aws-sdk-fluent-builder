@@ -21,11 +21,11 @@ export class S3ConfigurationBuilder {
     }
 
     withFileContents(filePath: string): S3ConfigurationBuilder {
-        const fileContent = fs.readFileSync(filePath);
-        if (fileContent) {
+        try {
+            const fileContent = fs.readFileSync(filePath);
             this.contents = JSON.parse(fileContent.toString());
             return this;
-        } else {
+        } catch (exception) {
             throw new Error('File ' + filePath + ' does not exist');
         }
     }
