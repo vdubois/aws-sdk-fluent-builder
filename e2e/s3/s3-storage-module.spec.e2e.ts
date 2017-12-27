@@ -199,6 +199,26 @@ describe('S3 Storage module', () => {
                 });
         });
     });
+
+    describe('copyFile function', () => {
+
+        it('should throw an error if source file path does not exist in bucket', done => {
+            // GIVEN
+            emptyBucket()
+                // WHEN
+                .then(() => storageService.copyFile('test.txt', 'test2.txt'))
+                .then(() => {
+                    fail('we should never reach here because the file does not exist in bucket');
+                    done();
+                })
+                .catch(exception => {
+                    // THEN
+                    expect(exception).not.toBeNull();
+                    expect(exception.message).toEqual('copyFile function : InvalidArgument: Invalid copy source URI.');
+                    done();
+                });
+        });
+    });
 });
 
 const emptyBucket = (): Promise<any> => {

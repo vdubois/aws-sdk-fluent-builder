@@ -241,4 +241,77 @@ describe('S3StorageService', () => {
                 });
         });
     });
+
+    describe('copyFile function', () => {
+
+        it('should throw an error if aws sdk throws an error', done => {
+            // GIVEN
+            const mockedS3 = new S3();
+            spyOn(mockedS3, 'copyObject').and.returnValue({
+                promise: () => Promise.reject('copy error')
+            });
+            const storageService = new S3StorageService('toto', mockedS3);
+
+            // WHEN
+            storageService.copyFile('test.txt', 'test2.txt')
+                .then(() => {
+                    fail('we should not reach here because an error must have been thrown by aws sdk');
+                    done();
+                })
+                .catch(exception => {
+                    // THEN
+                    expect(exception).not.toBeNull();
+                    expect(exception.message).toEqual('copyFile function : copy error');
+                    done();
+                });
+        });
+
+        it('should throw an error if source and destination have same paths', done => {
+            // GIVEN
+            const mockedS3 = new S3();
+            spyOn(mockedS3, 'copyObject').and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            const storageService = new S3StorageService('toto', mockedS3);
+
+            // WHEN
+            storageService.copyFile('test.txt', 'test.txt')
+                .then(() => {
+                    fail('we should not reach here because an error must have been thrown');
+                    done();
+                })
+                .catch(exception => {
+                    // THEN
+                    expect(exception).not.toBeNull();
+                    expect(exception).toEqual('copyFile function : source and destination must have different paths');
+                    done();
+                });
+        });
+
+        it('should copy file with a call to aws sdk', done => {
+            // GIVEN
+            const mockedS3 = new S3();
+            spyOn(mockedS3, 'copyObject').and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            const storageService = new S3StorageService('toto', mockedS3);
+
+            // WHEN
+            storageService.copyFile('test.txt', 'test2.txt')
+                .then(() => {
+                    // THEN
+                    expect(mockedS3.copyObject).toHaveBeenCalledTimes(1);
+                    expect(mockedS3.copyObject).toHaveBeenCalledWith({
+                        Bucket: 'toto',
+                        CopySource: 's3://toto/test.txt',
+                        Key: 'test2.txt'
+                    });
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
+                    done();
+                });
+        });
+    });
 });

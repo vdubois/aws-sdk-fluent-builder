@@ -46,11 +46,17 @@ export class S3StorageService {
             });
     }
 
-    /*mkdir(path: string): Promise<any> {
-
+    copyFile(sourceFilePath: string, destinationFilePath: string): Promise<any> {
+        if (sourceFilePath === destinationFilePath) {
+            return Promise.reject('copyFile function : source and destination must have different paths');
+        }
+        return this.s3Client.copyObject({
+            Bucket: this.bucketName,
+            CopySource: `s3://${this.bucketName}/${sourceFilePath}`,
+            Key: destinationFilePath
+        }).promise()
+            .catch(exception => {
+                throw new Error(`copyFile function : ${exception}`);
+            });
     }
-
-    rmdir(path: string): Promise<any> {
-
-    }*/
 }
