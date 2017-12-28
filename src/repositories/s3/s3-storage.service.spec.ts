@@ -303,7 +303,7 @@ describe('S3StorageService', () => {
                     expect(mockedS3.copyObject).toHaveBeenCalledTimes(1);
                     expect(mockedS3.copyObject).toHaveBeenCalledWith({
                         Bucket: 'toto',
-                        CopySource: 's3://toto/test.txt',
+                        CopySource: 'toto/test.txt',
                         Key: 'test2.txt'
                     });
                     done();

@@ -52,7 +52,7 @@ export class S3StorageService {
         }
         return this.s3Client.copyObject({
             Bucket: this.bucketName,
-            CopySource: `s3://${this.bucketName}/${sourceFilePath}`,
+            CopySource: `${this.bucketName}/${sourceFilePath}`,
             Key: destinationFilePath
         }).promise()
             .catch(exception => {

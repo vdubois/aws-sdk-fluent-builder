@@ -214,7 +214,43 @@ describe('S3 Storage module', () => {
                 .catch(exception => {
                     // THEN
                     expect(exception).not.toBeNull();
-                    expect(exception.message).toEqual('copyFile function : InvalidArgument: Invalid copy source URI.');
+                    expect(exception.message).toEqual('copyFile function : NoSuchKey: The specified key does not exist.');
+                    done();
+                });
+        });
+
+        it('should copy file if source file exists and destination files does not exist', done => {
+            // GIVEN
+            emptyBucket()
+                .then(() => uploadAllFiles())
+                // WHEN
+                .then(() => storageService.copyFile('test.txt', 'copied.txt'))
+                .then(() => loadFileContent('copied.txt'))
+                .then(fileContent => {
+                    // THEN
+                    expect(fileContent).toEqual('sample data');
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
+                    done();
+                });
+        });
+
+        it('should copy file if source file exists and destination file already exist', done => {
+            // GIVEN
+            emptyBucket()
+                .then(() => uploadAllFiles())
+                // WHEN
+                .then(() => storageService.copyFile('test.txt', 'test.md'))
+                .then(() => loadFileContent('test.md'))
+                .then(fileContent => {
+                    // THEN
+                    expect(fileContent).toEqual('sample data');
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
                     done();
                 });
         });
