@@ -14,6 +14,11 @@ export class S3ConfigurationService {
         return this._bucketName;
     }
 
+    /**
+     * Get a configuration value using its key (based on JSON object)
+     * @param {string} configurationKey
+     * @returns {Promise<any>}
+     */
     get(configurationKey: string): Promise<any> {
         return this.loadConfiguration()
             .then(configuration => {
@@ -25,6 +30,10 @@ export class S3ConfigurationService {
             });
     }
 
+    /**
+     * Get the configuration object
+     * @returns {Promise<any>}
+     */
     all(): Promise<any> {
         return this.loadConfiguration();
     }

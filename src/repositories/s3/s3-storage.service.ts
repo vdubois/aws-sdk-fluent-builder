@@ -5,6 +5,11 @@ export class S3StorageService {
     constructor(private bucketName: string, private s3Client = new S3({ region: process.env.AWS_REGION })) {
     }
 
+    /**
+     * List files in bucket using an optional predicate
+     * @param {(file) => boolean} predicate
+     * @returns {Promise<any>}
+     */
     listFiles(predicate = (file) => true): Promise<any> {
         return this.s3Client.listObjects({Bucket: this.bucketName}).promise()
             .then(files => files.Contents.map(file => file.Key))
@@ -14,6 +19,11 @@ export class S3StorageService {
             });
     }
 
+    /**
+     * Reads file with path in bucket and returns a Buffer
+     * @param {string} filePath
+     * @returns {Promise<any>}
+     */
     readFile(filePath: string): Promise<any> {
         return this.s3Client.getObject({
             Bucket: this.bucketName,
@@ -25,6 +35,12 @@ export class S3StorageService {
             });
     }
 
+    /**
+     * Writes file with path in bucket
+     * @param {string} filePath
+     * @param {Buffer} fileContent
+     * @returns {Promise<any>}
+     */
     writeFile(filePath: string, fileContent: Buffer): Promise<any> {
         return this.s3Client.upload({
             Bucket: this.bucketName,
@@ -36,6 +52,11 @@ export class S3StorageService {
             });
     }
 
+    /**
+     * Deletes a file in bucket using its path
+     * @param {string} filePath
+     * @returns {Promise<any>}
+     */
     deleteFile(filePath: string): Promise<any> {
         return this.s3Client.deleteObject({
             Bucket: this.bucketName,
@@ -46,6 +67,12 @@ export class S3StorageService {
             });
     }
 
+    /**
+     * Copies a file in bucket using source and destination paths
+     * @param {string} sourceFilePath
+     * @param {string} destinationFilePath
+     * @returns {Promise<any>}
+     */
     copyFile(sourceFilePath: string, destinationFilePath: string): Promise<any> {
         if (sourceFilePath === destinationFilePath) {
             return Promise.reject('copyFile function : source and destination must have different paths');
