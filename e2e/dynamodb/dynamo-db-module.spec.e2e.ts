@@ -10,7 +10,7 @@ const dynamoDbRepository = new DynamoDbBuilder()
     .withTableName(tableName)
     .build();
 
-fdescribe('DynamoDB module', () => {
+describe('DynamoDB module', () => {
 
     let originalTimeout;
 
@@ -324,7 +324,7 @@ const createTableIfNotExist = (): Promise<any> => {
                 return dynamoDbClient.createTable(createTableParams).promise()
                     .then(() => dynamoDbClient.waitFor('tableExists', {TableName: tableName}).promise());
             }
-        })
+        });
 };
 
 const emptyTable = (): Promise<any> => {
