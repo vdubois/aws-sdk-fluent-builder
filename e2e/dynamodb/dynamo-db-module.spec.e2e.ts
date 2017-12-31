@@ -29,11 +29,11 @@ describe('DynamoDB module', () => {
             deleteTableIfExist()
                 .then(() => {
                     // WHEN
-                    const alreadyExistingTableRepository = new DynamoDbBuilder()
+                    const tableRepository = new DynamoDbBuilder()
                         .withTableName(tableName)
                         .createIfNotExists()
                         .build();
-                    return alreadyExistingTableRepository.findAll();
+                    return tableRepository.findAll();
                 })
                 .then(() => listTables())
                 .then(tableNames => {
@@ -49,7 +49,7 @@ describe('DynamoDB module', () => {
 
         it('should not throw an error if table already exists', done => {
             // GIVEN
-            const alreadyExistingTableRepository = new DynamoDbBuilder()
+            const tableRepository = new DynamoDbBuilder()
                 .withTableName(tableName)
                 .createIfNotExists()
                 .build();
@@ -57,7 +57,7 @@ describe('DynamoDB module', () => {
             // WHEN
             try {
                 createTableIfNotExist()
-                    .then(() => alreadyExistingTableRepository.findAll())
+                    .then(() => tableRepository.findAll())
                     .then(results => {
                         // THEN
                         expect(results).not.toBeNull();

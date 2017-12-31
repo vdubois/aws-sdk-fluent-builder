@@ -22,6 +22,9 @@ describe('DynamoDbRepositoryProxy', () => {
             spyOn(mockedDynamoDb, 'createTable').and.returnValue({
                 promise: () => Promise.resolve({})
             });
+            spyOn(mockedDynamoDb, 'waitFor').and.returnValue({
+                promise: () => Promise.resolve({})
+            });
             const mockedDocumentClient = new DocumentClient();
             spyOn(mockedDocumentClient, 'scan').and.returnValue({
                 promise: () => Promise.resolve({Items: [{myProperty: 'myValue'}]})
@@ -57,6 +60,9 @@ describe('DynamoDbRepositoryProxy', () => {
                 promise: () => Promise.resolve({TableNames: ['toto']})
             });
             spyOn(mockedDynamoDb, 'createTable').and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            spyOn(mockedDynamoDb, 'waitFor').and.returnValue({
                 promise: () => Promise.resolve({})
             });
             const mockedDocumentClient = new DocumentClient();
