@@ -1,5 +1,5 @@
 import { DynamoDbBuilder } from '../../src/builders/dynamodb/dynamo-db.builder';
-import { DeleteTableInput, DocumentClient } from 'aws-sdk/clients/dynamodb';
+import { CreateTableInput, DeleteTableInput, DocumentClient } from 'aws-sdk/clients/dynamodb';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 import PutItemInput = DocumentClient.PutItemInput;
 
@@ -10,9 +10,42 @@ const dynamoDbRepository = new DynamoDbBuilder()
     .withTableName(tableName)
     .build();
 
-describe('DynamoDB module', () => {
+fdescribe('DynamoDB module', () => {
+
+    let originalTimeout;
+
+    /**
+     * Sets timeout to 30s.
+     */
+    beforeEach(() => {
+        originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+        jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
+    });
 
     describe('createIfNotExists function', () => {
+
+        it('should create table if it does not exist', done => {
+            // GIVEN
+            deleteTableIfExist()
+                .then(() => {
+                    // WHEN
+                    const alreadyExistingTableRepository = new DynamoDbBuilder()
+                        .withTableName(tableName)
+                        .createIfNotExists()
+                        .build();
+                    return alreadyExistingTableRepository.findAll();
+                })
+                .then(() => listTables())
+                .then(tableNames => {
+                    // THEN
+                    expect(tableNames).toContain(tableName);
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
+                    done();
+                });
+        });
 
         it('should not throw an error if table already exists', done => {
             // GIVEN
@@ -23,7 +56,8 @@ describe('DynamoDB module', () => {
 
             // WHEN
             try {
-                alreadyExistingTableRepository.findAll()
+                createTableIfNotExist()
+                    .then(() => alreadyExistingTableRepository.findAll())
                     .then(results => {
                         // THEN
                         expect(results).not.toBeNull();
@@ -40,7 +74,8 @@ describe('DynamoDB module', () => {
 
         it('should return all table objects', done => {
             // GIVEN
-            emptyTable()
+            createTableIfNotExist()
+                .then(() => emptyTable())
                 .then(() => insertItem({id: '1', value: 'test'}))
                 .then(() => insertItem({ id: '2', value: 'test 2' }))
                 // WHEN
@@ -52,10 +87,8 @@ describe('DynamoDB module', () => {
                     done();
                 })
                 .catch(exception => {
-                    deleteTable().then(() => {
-                        fail(exception);
-                        done();
-                    });
+                    fail(exception);
+                    done();
                 });
         });
     });
@@ -64,7 +97,8 @@ describe('DynamoDB module', () => {
 
         it('should return an object specified by its id', done => {
             // GIVEN
-            emptyTable()
+            createTableIfNotExist()
+                .then(() => emptyTable())
                 .then(() => insertItem({id: '3', value: 'test 3'}))
                 .then(() => insertItem({ id: '4', value: 'test 4' }))
                 // WHEN
@@ -83,7 +117,8 @@ describe('DynamoDB module', () => {
 
         it('should not return an object if its id does not exists', done => {
             // GIVEN
-            emptyTable()
+            createTableIfNotExist()
+                .then(() => emptyTable())
                 .then((result) => insertItem({id: '3', value: 'test 3'}))
                 .then((result) => insertItem({ id: '4', value: 'test 4' }))
                 // WHEN
@@ -104,7 +139,8 @@ describe('DynamoDB module', () => {
 
         it('should return objects specified by its fields values', done => {
             // GIVEN
-            emptyTable()
+            createTableIfNotExist()
+                .then(() => emptyTable())
                 .then(() => insertItem({id: '3', value: 'test'}))
                 .then(() => insertItem({ id: '4', value: 'test 4' }))
                 .then(() => insertItem({ id: '5', value: 'test' }))
@@ -125,7 +161,8 @@ describe('DynamoDB module', () => {
 
         it('should not return objects based on fields values if values do not exist', done => {
             // GIVEN
-            emptyTable()
+            createTableIfNotExist()
+                .then(() => emptyTable())
                 .then(() => insertItem({id: '3', value: 'test'}))
                 .then(() => insertItem({ id: '4', value: 'test 4' }))
                 .then(() => insertItem({ id: '5', value: 'test' }))
@@ -148,7 +185,8 @@ describe('DynamoDB module', () => {
 
         it('should save objects in database', done => {
             // GIVEN
-            emptyTable()
+            createTableIfNotExist()
+                .then(() => emptyTable())
                 // WHEN
                 .then(() => dynamoDbRepository.save({id: 'test', value: 'myValue'}))
                 .then(() => dynamoDbRepository.save({id: 'test2', value: 'myValue2'}))
@@ -167,8 +205,9 @@ describe('DynamoDB module', () => {
 
         it('should an object with same id multiple times just one time in database', done => {
             // GIVEN
-            emptyTable()
-            // WHEN
+            createTableIfNotExist()
+                .then(() => emptyTable())
+                // WHEN
                 .then(() => dynamoDbRepository.save({id: 'test', value: 'myValue'}))
                 .then(() => dynamoDbRepository.save({id: 'test', value: 'myValue2'}))
                 .then(() => listAll())
@@ -190,7 +229,8 @@ describe('DynamoDB module', () => {
 
         it('should delete an object with its id', done => {
             // GIVEN
-            emptyTable()
+            createTableIfNotExist()
+                .then(() => emptyTable())
                 .then(() => insertItem({id: 'a', value: 'myValue'}))
                 .then(() => insertItem({id: 'b', value: 'myValue2'}))
                 // WHEN
@@ -211,7 +251,8 @@ describe('DynamoDB module', () => {
 
         it('should not delete anything with an id that does not exist', done => {
             // GIVEN
-            emptyTable()
+            createTableIfNotExist()
+                .then(() => emptyTable())
                 .then(() => insertItem({id: 'a', value: 'myValue'}))
                 .then(() => insertItem({id: 'b', value: 'myValue2'}))
                 // WHEN
@@ -235,7 +276,8 @@ describe('DynamoDB module', () => {
 
         it('should delete all data from tables', done => {
             // GIVEN
-            emptyTable()
+            createTableIfNotExist()
+                .then(() => emptyTable())
                 .then(() => insertItem({id: 'c', value: 'myValue'}))
                 .then(() => insertItem({id: 'd', value: 'myValue2'}))
                 // WHEN
@@ -252,10 +294,38 @@ describe('DynamoDB module', () => {
                     fail(exception);
                     done();
                 });
-
         });
     });
 });
+
+const createTableIfNotExist = (): Promise<any> => {
+    const dynamoDbClient = new DynamoDB({region: process.env.AWS_REGION});
+    return dynamoDbClient.listTables({}).promise()
+        .then(results => results.TableNames)
+        .then(tableNames => {
+            if (tableNames.some(name => name === tableName)) {
+                return Promise.resolve({});
+            } else {
+                const createTableParams: CreateTableInput = {
+                    TableName: tableName,
+                    AttributeDefinitions: [{
+                        AttributeName: 'id',
+                        AttributeType: 'S'
+                    }],
+                    KeySchema: [{
+                        AttributeName: 'id',
+                        KeyType: 'HASH'
+                    }],
+                    ProvisionedThroughput: {
+                        ReadCapacityUnits: 1,
+                        WriteCapacityUnits: 1
+                    }
+                };
+                return dynamoDbClient.createTable(createTableParams).promise()
+                    .then(() => dynamoDbClient.waitFor('tableExists', {TableName: tableName}).promise());
+            }
+        })
+};
 
 const emptyTable = (): Promise<any> => {
     const dynamoDbClient = new DocumentClient({region: process.env.AWS_REGION});
@@ -265,12 +335,21 @@ const emptyTable = (): Promise<any> => {
             Promise.all(results.Items.map(item => dynamoDbClient.delete({TableName: tableName, Key: {id: item.id}}).promise())));
 };
 
-const deleteTable = (): Promise<any> => {
+const deleteTableIfExist = (): Promise<any> => {
     const dynamoDbClient = new DynamoDB({region: process.env.AWS_REGION});
-    const deleteTableParams: DeleteTableInput = {
-        TableName : tableName
-    };
-    return dynamoDbClient.deleteTable(deleteTableParams).promise();
+    return dynamoDbClient.listTables({}).promise()
+        .then(results => results.TableNames)
+        .then(tableNames => {
+            if (tableNames.some(name => name === tableName)) {
+                const deleteTableParams: DeleteTableInput = {
+                    TableName : tableName
+                };
+                return dynamoDbClient.deleteTable(deleteTableParams).promise()
+                    .then(() => dynamoDbClient.waitFor('tableNotExists', {TableName: tableName}).promise());
+            } else {
+                return Promise.resolve({});
+            }
+        });
 };
 
 const insertItem = (item: object): Promise<any> =>  {
@@ -285,4 +364,10 @@ const insertItem = (item: object): Promise<any> =>  {
 const listAll = (): Promise<any> => {
     const dynamoDbClient = new DocumentClient({region: process.env.AWS_REGION});
     return dynamoDbClient.scan({TableName: tableName}).promise().then(result => result.Items);
+};
+
+const listTables = (): Promise<any> => {
+    const dynamoDbClient = new DynamoDB({region: process.env.AWS_REGION});
+    return dynamoDbClient.listTables({}).promise()
+        .then(results => results.TableNames);
 };

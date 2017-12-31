@@ -31,7 +31,8 @@ export class DynamoDbRepositoryProxy implements DynamoDbRepository {
                 if (results.TableNames.some(name => this.dynamoDbRepository.tableName === name)) {
                     return Promise.resolve({});
                 } else {
-                    return this.dynamoDbClient.createTable(createTableParams).promise();
+                    return this.dynamoDbClient.createTable(createTableParams).promise()
+                        .then(() => this.dynamoDbClient.waitFor('tableExists', {TableName: this.dynamoDbRepository.tableName}).promise());
                 }
             });
     }
