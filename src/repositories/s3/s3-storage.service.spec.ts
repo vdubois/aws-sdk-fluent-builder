@@ -12,7 +12,7 @@ describe('S3StorageService', () => {
             spyOn(mockedS3, 'listObjects').and.returnValue({
                 promise: () => Promise.resolve({Contents: []})
             });
-            const storageService = new S3StorageService('toto', mockedS3);
+            const storageService = new S3StorageService('toto', false, mockedS3);
 
             // WHEN
             storageService.listFiles()
@@ -34,7 +34,7 @@ describe('S3StorageService', () => {
             spyOn(mockedS3, 'listObjects').and.returnValue({
                 promise: () => Promise.resolve({Contents: [{Key: 'test.file'}]} as ListObjectsOutput)
             });
-            const storageService = new S3StorageService('toto', mockedS3);
+            const storageService = new S3StorageService('toto', false, mockedS3);
 
             // WHEN
             storageService.listFiles()
@@ -57,7 +57,7 @@ describe('S3StorageService', () => {
             spyOn(mockedS3, 'listObjects').and.returnValue({
                 promise: () => Promise.resolve({Contents: [{Key: 'test.file'}, {Key: 'test2.txt'}]} as ListObjectsOutput)
             });
-            const storageService = new S3StorageService('toto', mockedS3);
+            const storageService = new S3StorageService('toto', false, mockedS3);
 
             // WHEN
             storageService.listFiles(file => file.endsWith('.txt'))
@@ -80,7 +80,7 @@ describe('S3StorageService', () => {
             spyOn(mockedS3, 'listObjects').and.returnValue({
                 promise: () => Promise.reject('Error when listing files')
             });
-            const storageService = new S3StorageService('toto', mockedS3);
+            const storageService = new S3StorageService('toto', false, mockedS3);
 
             // WHEN
             storageService.listFiles()
@@ -107,7 +107,7 @@ describe('S3StorageService', () => {
             spyOn(mockedS3, 'getObject').and.returnValue({
                 promise: () => Promise.resolve({Body: 'content'})
             });
-            const storageService = new S3StorageService('toto', mockedS3);
+            const storageService = new S3StorageService('toto', false, mockedS3);
 
             // WHEN
             storageService.readFile('test.txt')
@@ -129,7 +129,7 @@ describe('S3StorageService', () => {
             spyOn(mockedS3, 'getObject').and.returnValue({
                 promise: () => Promise.reject('read error')
             });
-            const storageService = new S3StorageService('toto', mockedS3);
+            const storageService = new S3StorageService('toto', false, mockedS3);
 
             // WHEN
             storageService.readFile('test.txt')
@@ -154,7 +154,7 @@ describe('S3StorageService', () => {
             spyOn(mockedS3, 'upload').and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            const storageService = new S3StorageService('toto', mockedS3);
+            const storageService = new S3StorageService('toto', false, mockedS3);
 
             // WHEN
             storageService.writeFile('test.txt', new Buffer('content'))
@@ -175,7 +175,7 @@ describe('S3StorageService', () => {
             spyOn(mockedS3, 'upload').and.returnValue({
                 promise: () => Promise.reject('write error')
             });
-            const storageService = new S3StorageService('toto', mockedS3);
+            const storageService = new S3StorageService('toto', false, mockedS3);
 
             // WHEN
             storageService.writeFile('path.txt', new Buffer('content'))
@@ -200,7 +200,7 @@ describe('S3StorageService', () => {
             spyOn(mockedS3, 'deleteObject').and.returnValue({
                 promise: () => Promise.reject('delete error')
             });
-            const storageService = new S3StorageService('toto', mockedS3);
+            const storageService = new S3StorageService('toto', false, mockedS3);
 
             // WHEN
             storageService.deleteFile('test.txt')
@@ -222,7 +222,7 @@ describe('S3StorageService', () => {
             spyOn(mockedS3, 'deleteObject').and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            const storageService = new S3StorageService('toto', mockedS3);
+            const storageService = new S3StorageService('toto', false, mockedS3);
 
             // WHEN
             storageService.deleteFile('test.txt')
@@ -250,7 +250,7 @@ describe('S3StorageService', () => {
             spyOn(mockedS3, 'copyObject').and.returnValue({
                 promise: () => Promise.reject('copy error')
             });
-            const storageService = new S3StorageService('toto', mockedS3);
+            const storageService = new S3StorageService('toto', false, mockedS3);
 
             // WHEN
             storageService.copyFile('test.txt', 'test2.txt')
@@ -272,7 +272,7 @@ describe('S3StorageService', () => {
             spyOn(mockedS3, 'copyObject').and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            const storageService = new S3StorageService('toto', mockedS3);
+            const storageService = new S3StorageService('toto', false, mockedS3);
 
             // WHEN
             storageService.copyFile('test.txt', 'test.txt')
@@ -294,7 +294,7 @@ describe('S3StorageService', () => {
             spyOn(mockedS3, 'copyObject').and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            const storageService = new S3StorageService('toto', mockedS3);
+            const storageService = new S3StorageService('toto', false, mockedS3);
 
             // WHEN
             storageService.copyFile('test.txt', 'test2.txt')

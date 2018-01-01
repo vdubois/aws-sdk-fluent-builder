@@ -12,6 +12,73 @@ const storageService = new S3Builder()
 
 describe('S3 Storage module', () => {
 
+    let originalTimeout;
+
+    /**
+     * Sets timeout to 30s.
+     */
+    beforeEach(() => {
+        originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+        jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
+    });
+
+    describe('createIfNotExists function', () => {
+
+        it('should create the bucket if it does not exist', done => {
+            // GIVEN
+            const storageService = new S3Builder()
+                .withBucketName(bucketName)
+                .createIfNotExists()
+                .asStorageService()
+                .build();
+            deleteBucketIfExists()
+                // WHEN
+                .then(() => storageService.listFiles())
+                .then(value => {
+                    // THEN
+                    expect(value).not.toBeNull();
+                    expect(value).toEqual([]);
+                    return listBuckets();
+                })
+                .then(buckets => {
+                    expect(buckets).not.toBeNull();
+                    expect(buckets).toContain(bucketName);
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
+                    done();
+                });
+        });
+
+        it('should not throw an error if the bucket already exist', done => {
+            // GIVEN
+            const configurationService = new S3Builder()
+                .withBucketName(bucketName)
+                .createIfNotExists()
+                .asStorageService()
+                .build();
+            createBucketIfNotExists()
+                // WHEN
+                .then(() => storageService.listFiles())
+                .then(value => {
+                    // THEN
+                    expect(value).not.toBeNull();
+                    expect(value).toEqual([]);
+                    return listBuckets();
+                })
+                .then(buckets => {
+                    expect(buckets).not.toBeNull();
+                    expect(buckets).toContain(bucketName);
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
+                    done();
+                });
+        });
+    });
+
     describe('listFiles function', () => {
 
         it('should get an empty list if bucket is empty', done => {
@@ -257,6 +324,41 @@ describe('S3 Storage module', () => {
     });
 });
 
+const deleteBucketIfExists = () => {
+    const s3Client = new S3({ region: process.env.AWS_REGION });
+    return s3Client.listBuckets().promise()
+        .then(results => results.Buckets)
+        .then(bucketNames => {
+            if (bucketNames.some(bucket => bucket.Name === bucketName)) {
+                return s3Client.listObjects({Bucket: bucketName}).promise()
+                    .then(objects => objects.Contents)
+                    .then(objects => Promise.all(
+                        objects.map(s3Object => s3Client.deleteObject({
+                            Bucket: bucketName,
+                            Key: s3Object.Key
+                        }).promise())))
+                    .then(() => s3Client.deleteBucket({Bucket: bucketName}).promise())
+                    .then(() => s3Client.waitFor('bucketNotExists', {Bucket: bucketName}));
+            } else {
+                return Promise.resolve({});
+            }
+        });
+};
+
+const createBucketIfNotExists = () => {
+    const s3Client = new S3({ region: process.env.AWS_REGION });
+    return s3Client.listBuckets().promise()
+        .then(results => results.Buckets)
+        .then(bucketNames => {
+            if (bucketNames.some(bucket => bucket.Name === bucketName)) {
+                return Promise.resolve({});
+            } else {
+                return s3Client.createBucket({Bucket: bucketName}).promise()
+                    .then(() => s3Client.waitFor('bucketExists', {Bucket: bucketName}));
+            }
+        });
+};
+
 const emptyBucket = (): Promise<any> => {
     const s3Client = new S3({ region: process.env.AWS_REGION });
     return s3Client.listObjects({Bucket: bucketName}).promise()
@@ -292,4 +394,10 @@ const listFiles = (): Promise<any> => {
     const s3Client = new S3({ region: process.env.AWS_REGION });
     return s3Client.listObjects({Bucket: bucketName}).promise()
         .then(result => result.Contents.map(file => file.Key));
+};
+
+const listBuckets = () => {
+    const s3Client = new S3({ region: process.env.AWS_REGION });
+    return s3Client.listBuckets().promise()
+        .then(results => results.Buckets.map(bucket => bucket.Name));
 };

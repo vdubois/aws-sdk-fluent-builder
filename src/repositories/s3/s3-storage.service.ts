@@ -2,7 +2,9 @@ import S3 = require('aws-sdk/clients/s3');
 
 export class S3StorageService {
 
-    constructor(private bucketName: string, private s3Client = new S3({ region: process.env.AWS_REGION })) {
+    constructor(private bucketName: string,
+                private mustCreateBeforeUse: boolean,
+                private s3Client = new S3({ region: process.env.AWS_REGION })) {
     }
 
     /**
@@ -11,7 +13,8 @@ export class S3StorageService {
      * @returns {Promise<any>}
      */
     listFiles(predicate = (file) => true): Promise<any> {
-        return this.s3Client.listObjects({Bucket: this.bucketName}).promise()
+        return this.createBucketIfNecesary()
+            .then(() => this.s3Client.listObjects({Bucket: this.bucketName}).promise())
             .then(files => files.Contents.map(file => file.Key))
             .then(filesNames => filesNames.filter(predicate))
             .catch(exception => {
@@ -25,10 +28,11 @@ export class S3StorageService {
      * @returns {Promise<any>}
      */
     readFile(filePath: string): Promise<any> {
-        return this.s3Client.getObject({
-            Bucket: this.bucketName,
-            Key: filePath
-        }).promise()
+        return this.createBucketIfNecesary()
+            .then(() => this.s3Client.getObject({
+                Bucket: this.bucketName,
+                Key: filePath
+            }).promise())
             .then(file => file.Body)
             .catch(exception => {
                 throw new Error(`readFile function : ${exception}`);
@@ -42,11 +46,12 @@ export class S3StorageService {
      * @returns {Promise<any>}
      */
     writeFile(filePath: string, fileContent: Buffer): Promise<any> {
-        return this.s3Client.upload({
-            Bucket: this.bucketName,
-            Key: filePath,
-            Body: fileContent
-        }).promise()
+        return this.createBucketIfNecesary()
+            .then(() => this.s3Client.upload({
+                Bucket: this.bucketName,
+                Key: filePath,
+                Body: fileContent
+            }).promise())
             .catch(exception => {
                 throw new Error(`writeFile function : ${exception}`);
             });
@@ -58,10 +63,11 @@ export class S3StorageService {
      * @returns {Promise<any>}
      */
     deleteFile(filePath: string): Promise<any> {
-        return this.s3Client.deleteObject({
-            Bucket: this.bucketName,
-            Key: filePath
-        }).promise()
+        return this.createBucketIfNecesary()
+            .then(() => this.s3Client.deleteObject({
+                Bucket: this.bucketName,
+                Key: filePath
+            }).promise())
             .catch(exception => {
                 throw new Error(`deleteFile function : ${exception}`);
             });
@@ -77,13 +83,31 @@ export class S3StorageService {
         if (sourceFilePath === destinationFilePath) {
             return Promise.reject('copyFile function : source and destination must have different paths');
         }
-        return this.s3Client.copyObject({
-            Bucket: this.bucketName,
-            CopySource: `${this.bucketName}/${sourceFilePath}`,
-            Key: destinationFilePath
-        }).promise()
+        return this.createBucketIfNecesary()
+            .then(() => this.s3Client.copyObject({
+                Bucket: this.bucketName,
+                CopySource: `${this.bucketName}/${sourceFilePath}`,
+                Key: destinationFilePath
+            }).promise())
             .catch(exception => {
                 throw new Error(`copyFile function : ${exception}`);
             });
+    }
+
+    private createBucketIfNecesary(): Promise<any> {
+        if (this.mustCreateBeforeUse) {
+            return this.s3Client.listBuckets().promise()
+                .then(results => results.Buckets)
+                .then(buckets => {
+                    if (buckets.some(bucket => bucket.Name === this.bucketName)) {
+                        return Promise.resolve({});
+                    } else {
+                        return this.s3Client.createBucket({Bucket: this.bucketName}).promise()
+                            .then(() => this.s3Client.waitFor('bucketExists', {Bucket: this.bucketName}));
+                    }
+                });
+        } else {
+            return Promise.resolve({});
+        }
     }
 }

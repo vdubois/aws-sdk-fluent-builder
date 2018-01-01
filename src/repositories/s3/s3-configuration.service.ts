@@ -41,7 +41,7 @@ export class S3ConfigurationService {
 
     private createBucketIfNecesary(): Promise<any> {
         if (this.mustCreateBeforeUse) {
-            return this.s3Client.listBuckets({}).promise()
+            return this.s3Client.listBuckets().promise()
                 .then(results => results.Buckets)
                 .then(buckets => {
                     if (buckets.some(bucket => bucket.Name === this.bucketName)) {
