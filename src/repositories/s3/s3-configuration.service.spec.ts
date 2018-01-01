@@ -12,7 +12,7 @@ describe('S3ConfigurationService', () => {
                 promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({key: 'value'}))})
             });
             const configurationService = new S3ConfigurationService(
-                'toto', 'config.json', undefined, mockedS3);
+                'toto', 'config.json', undefined, false, mockedS3);
 
             // WHEN
             configurationService.get('key')
@@ -39,7 +39,7 @@ describe('S3ConfigurationService', () => {
                 promise: () => Promise.resolve({})
             });
             const configurationService = new S3ConfigurationService(
-                'toto', 'config.json', {we: `don't care`}, mockedS3);
+                'toto', 'config.json', {we: `don't care`}, false, mockedS3);
 
             // WHEN
             configurationService.get('key')
@@ -68,7 +68,7 @@ describe('S3ConfigurationService', () => {
             spyOn(mockedS3, 'getObject').and.returnValue({
                 promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({}))})
             });
-            const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, mockedS3);
+            const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, false, mockedS3);
 
             // WHEN
             configurationService.get('key')
@@ -90,7 +90,7 @@ describe('S3ConfigurationService', () => {
             spyOn(mockedS3, 'getObject').and.returnValue({
                 promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({key: 'value'}))})
             });
-            const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, mockedS3);
+            const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, false, mockedS3);
 
             // WHEN
             configurationService.get('key')
@@ -114,7 +114,7 @@ describe('S3ConfigurationService', () => {
             spyOn(mockedS3, 'getObject').and.returnValue({
                 promise: () => Promise.reject({})
             });
-            const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, mockedS3);
+            const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, false, mockedS3);
 
             // WHEN
             configurationService.get('key')
@@ -141,7 +141,7 @@ describe('S3ConfigurationService', () => {
             spyOn(mockedS3, 'getObject').and.returnValue({
                 promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({key: 'value', key2: 'value'}))})
             });
-            const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, mockedS3);
+            const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, false, mockedS3);
 
             // WHEN
             configurationService.all()
@@ -168,7 +168,7 @@ describe('S3ConfigurationService', () => {
                 promise: () => Promise.resolve({})
             });
             const configurationService = new S3ConfigurationService(
-                'toto', 'config.json', {we: `don't care`}, mockedS3);
+                'toto', 'config.json', {we: `don't care`}, false, mockedS3);
 
             // WHEN
             configurationService.all()
@@ -196,7 +196,7 @@ describe('S3ConfigurationService', () => {
             spyOn(mockedS3, 'getObject').and.returnValue({
                 promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({key: 'value'}))})
             });
-            const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, mockedS3);
+            const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, false, mockedS3);
 
             // WHEN
             configurationService.all()
@@ -219,7 +219,7 @@ describe('S3ConfigurationService', () => {
             spyOn(mockedS3, 'getObject').and.returnValue({
                 promise: () => Promise.reject({})
             });
-            const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, mockedS3);
+            const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, false, mockedS3);
 
             // WHEN
             configurationService.all()

@@ -6,7 +6,7 @@ export class S3ConfigurationBuilder {
     private sourceFileName = 'config.json';
     private contents: object;
 
-    constructor(private bucketName: string) {
+    constructor(private bucketName: string, private mustCreateBeforeUse: boolean) {
 
     }
 
@@ -31,6 +31,6 @@ export class S3ConfigurationBuilder {
     }
 
     build(): S3ConfigurationService {
-        return new S3ConfigurationService(this.bucketName, this.sourceFileName, this.contents);
+        return new S3ConfigurationService(this.bucketName, this.sourceFileName, this.contents, this.mustCreateBeforeUse);
     }
 }

@@ -20,7 +20,7 @@ export class S3Builder {
     asConfigurationService(): S3ConfigurationBuilder {
         this.checkAwsRegionEnvironmentVariableIsPresent();
         this.checkBucketNameWasProvide();
-        return new S3ConfigurationBuilder(this.bucketName);
+        return new S3ConfigurationBuilder(this.bucketName, this.mustCreateBeforeUse);
     }
 
     asStorageService(): S3StorageBuilder {
