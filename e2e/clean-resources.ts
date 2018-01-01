@@ -7,7 +7,8 @@ const cleanResources = (): Promise<any> => {
     console.log('Cleaning resources...');
     return deleteTableIfExist()
         .then(() => deleteTopicIfExist())
-        .then(() => deleteBucketIfExists('s3-configuration-module-e2e'));
+        .then(() => deleteBucketIfExists('s3-configuration-module-e2e'))
+        .then(() => deleteBucketIfExists('s3-storage-module-e2e'));
 };
 
 const deleteTableIfExist = (): Promise<any> => {
