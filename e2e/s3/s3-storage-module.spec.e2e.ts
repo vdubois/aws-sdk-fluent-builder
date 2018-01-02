@@ -26,11 +26,6 @@ describe('S3 Storage module', () => {
 
         it('should create the bucket if it does not exist', done => {
             // GIVEN
-            const storageService = new S3Builder()
-                .withBucketName(bucketName)
-                .createIfNotExists()
-                .asStorageService()
-                .build();
             deleteBucketIfExists()
                 // WHEN
                 .then(() => storageService.listFiles())
@@ -53,11 +48,6 @@ describe('S3 Storage module', () => {
 
         it('should not throw an error if the bucket already exist', done => {
             // GIVEN
-            const configurationService = new S3Builder()
-                .withBucketName(bucketName)
-                .createIfNotExists()
-                .asStorageService()
-                .build();
             createBucketIfNotExists()
                 // WHEN
                 .then(() => storageService.listFiles())
