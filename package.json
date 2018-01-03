@@ -55,6 +55,7 @@
     "jasmine": "^2.8.0",
     "jasmine-reporters": "^2.2.1",
     "jasmine-spec-reporter": "^4.2.1",
+    "needle": "^2.1.0",
     "nyc": "^11.3.0",
     "ts-node": "^4.0.1",
     "tslint": "^5.8.0",

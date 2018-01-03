@@ -8,7 +8,7 @@ export class S3ConfigurationService {
     constructor(private _bucketName: string, private fileName: string,
                 private contents: object,
                 private mustCreateBeforeUse: boolean,
-                private s3Client = new S3({ region: process.env.AWS_REGION })) {
+                private s3Client = new S3({region: process.env.AWS_REGION})) {
     }
 
     get bucketName(): string {

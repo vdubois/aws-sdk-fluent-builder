@@ -32,7 +32,7 @@ export class S3Builder {
     asHostingService(): S3HostingBuilder {
         this.checkAwsRegionEnvironmentVariableIsPresent();
         this.checkBucketNameWasProvide();
-        return new S3HostingBuilder(this.bucketName);
+        return new S3HostingBuilder(this.bucketName, this.mustCreateBeforeUse);
     }
 
     private checkAwsRegionEnvironmentVariableIsPresent() {

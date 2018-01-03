@@ -11,7 +11,7 @@ describe('S3HostingService', () => {
             spyOn(mockedS3, 'upload').and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            const hostingService = new S3HostingService('toto', mockedS3);
+            const hostingService = new S3HostingService('toto', false, mockedS3);
 
             // WHEN
             hostingService.uploadFilesFromDirectory('/my/directory')
@@ -32,7 +32,7 @@ describe('S3HostingService', () => {
             spyOn(mockedS3, 'upload').and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            const hostingService = new S3HostingService('toto', mockedS3);
+            const hostingService = new S3HostingService('toto', false, mockedS3);
 
             // WHEN
             hostingService.uploadFilesFromDirectory(`${__dirname}/../../../spec/data/directory/test.txt`)
@@ -54,7 +54,7 @@ describe('S3HostingService', () => {
             spyOn(mockedS3, 'upload').and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            const hostingService = new S3HostingService('toto', mockedS3);
+            const hostingService = new S3HostingService('toto', false, mockedS3);
 
             // WHEN
             hostingService.uploadFilesFromDirectory(`${__dirname}/../../../spec/data/directory`, '/subdir')
@@ -75,7 +75,7 @@ describe('S3HostingService', () => {
             spyOn(mockedS3, 'upload').and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            const hostingService = new S3HostingService('toto', mockedS3);
+            const hostingService = new S3HostingService('toto', false, mockedS3);
 
             // WHEN
             hostingService.uploadFilesFromDirectory(`${__dirname}/../../../spec/data/directory`, 'subdir/subdir2')
@@ -96,7 +96,13 @@ describe('S3HostingService', () => {
             spyOn(mockedS3, 'upload').and.returnValue({
                 promise: () => Promise.reject('upload error')
             });
-            const hostingService = new S3HostingService('toto', mockedS3);
+            spyOn(mockedS3, 'putBucketPolicy').and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            spyOn(mockedS3, 'putBucketWebsite').and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            const hostingService = new S3HostingService('toto', false, mockedS3);
 
             // WHEN
             hostingService.uploadFilesFromDirectory(`${__dirname}/../../../spec/data/directory`)
@@ -118,7 +124,13 @@ describe('S3HostingService', () => {
             spyOn(mockedS3, 'upload').and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            const hostingService = new S3HostingService('toto', mockedS3);
+            spyOn(mockedS3, 'putBucketPolicy').and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            spyOn(mockedS3, 'putBucketWebsite').and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            const hostingService = new S3HostingService('toto', false, mockedS3);
 
             // WHEN
             hostingService.uploadFilesFromDirectory(`${__dirname}/../../../spec/data/directory`)
@@ -154,7 +166,13 @@ describe('S3HostingService', () => {
             spyOn(mockedS3, 'upload').and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            const hostingService = new S3HostingService('toto', mockedS3);
+            spyOn(mockedS3, 'putBucketPolicy').and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            spyOn(mockedS3, 'putBucketWebsite').and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            const hostingService = new S3HostingService('toto', false, mockedS3);
 
             // WHEN
             hostingService.uploadFilesFromDirectory(
@@ -177,6 +195,40 @@ describe('S3HostingService', () => {
                         Key: 'mySubdir1/mySubdir2/test2.txt',
                         Body: new Buffer('data')
                     });
+                    done();
+                })
+                .catch(exception => {
+                    fail(exception);
+                    done();
+                });
+        });
+
+        it('should set the bucket type to website hosting', done => {
+            // GIVEN
+            const mockedS3 = new S3();
+            spyOn(mockedS3, 'createBucket').and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            spyOn(mockedS3, 'upload').and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            spyOn(mockedS3, 'putBucketPolicy').and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            spyOn(mockedS3, 'putBucketWebsite').and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            const hostingService = new S3HostingService('toto', true, mockedS3);
+
+            // WHEN
+            hostingService.uploadFilesFromDirectory(
+                `${__dirname}/../../../spec/data/directory`, 'mySubdir1/mySubdir2/')
+                .then(() => {
+                    // THEN
+                    expect(mockedS3.createBucket).toHaveBeenCalledTimes(1);
+                    expect(mockedS3.putBucketPolicy).toHaveBeenCalledTimes(1);
+                    expect(mockedS3.putBucketWebsite).toHaveBeenCalledTimes(1);
+                    expect(mockedS3.upload).toHaveBeenCalledTimes(3);
                     done();
                 })
                 .catch(exception => {
