@@ -77,5 +77,4 @@ hostingService.uploadFilesFromDirectory('/directory/path')
 
 ## Todos
 
-* Add S3 repository
 * Add Cognito repository
