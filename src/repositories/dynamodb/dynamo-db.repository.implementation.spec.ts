@@ -1,6 +1,6 @@
 import {DocumentClient} from 'aws-sdk/clients/dynamodb';
-import {DynamoDbTableCaracteristicsModel} from '../models/dynamo-db-table-caracteristics.model';
 import {DynamoDbRepositoryImplementation} from './dynamo-db.repository.implementation';
+import { DynamoDbTableCaracteristicsModel } from '../../models/dynamo-db-table-caracteristics.model';
 
 describe('DynamoDbRepositoryImplementation', () => {
 
