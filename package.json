@@ -1,6 +1,6 @@
 {
   "name": "aws-sdk-fluent-builder",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Fluent builder API for AWS SDK",
   "main": "dist/aws-sdk-fluent-builder.umd.js",
   "module": "dist/aws-sdk-fluent-builder.es5.js",
