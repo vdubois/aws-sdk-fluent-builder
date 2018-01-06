@@ -1,6 +1,5 @@
 import {DynamoDbRepository} from './dynamo-db.repository';
-import {CreateTableInput} from 'aws-sdk/clients/dynamodb';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
+import { CreateTableInput, default as DynamoDB } from 'aws-sdk/clients/dynamodb';
 import {DynamoDbRepositoryImplementation} from './dynamo-db.repository.implementation';
 
 export class DynamoDbRepositoryProxy implements DynamoDbRepository {

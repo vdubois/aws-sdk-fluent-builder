@@ -1,5 +1,5 @@
 import { Sns } from './sns';
-import SNS = require('aws-sdk/clients/sns');
+import * as SNS from 'aws-sdk/clients/sns';
 
 export class SnsImplementation implements Sns {
 

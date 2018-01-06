@@ -1,4 +1,4 @@
-import S3 = require('aws-sdk/clients/s3');
+import * as S3 from 'aws-sdk/clients/s3';
 import * as fs from 'fs';
 import * as path from 'path';
 import { PutBucketPolicyRequest, PutBucketWebsiteRequest } from 'aws-sdk/clients/s3';

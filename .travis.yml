@@ -7,6 +7,7 @@ before_script:
 - tsc
 script:
 - npm test
+- npm run build
 - npm run e2e
 env:
   global:

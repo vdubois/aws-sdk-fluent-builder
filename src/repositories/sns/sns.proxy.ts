@@ -1,6 +1,6 @@
 import { Sns } from './sns';
 import { SnsImplementation } from './sns.implementation';
-import SNS = require('aws-sdk/clients/sns');
+import * as SNS from 'aws-sdk/clients/sns';
 
 export class SnsProxy implements Sns {
 
