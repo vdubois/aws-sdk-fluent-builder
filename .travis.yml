@@ -2,7 +2,7 @@ language: node_js
 node_js:
 - '6'
 before_script:
-- node_modules/.bin/tslint -c tslint.json "src/**/*.ts"
+- node_modules/.bin/tslint -c tslint.json "src/**/*.ts" -e "**/*.d.ts"
 - node_modules/.bin/tslint -c tslint.json "e2e/**/*.ts"
 - tsc
 script:
