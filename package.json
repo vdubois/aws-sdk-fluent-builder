@@ -5,7 +5,9 @@
   "main": "index.js",
   "typings": "index.d.ts",
   "files": [
-    "."
+    "index.js",
+    "src/**/*.js",
+    "src/**/*.d.ts"
   ],
   "scripts": {
     "build": "tsc",
