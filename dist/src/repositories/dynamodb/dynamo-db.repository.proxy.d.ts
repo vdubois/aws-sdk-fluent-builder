@@ -1,6 +1,6 @@
 import { DynamoDbRepository } from './dynamo-db.repository';
-import { default as DynamoDB } from 'aws-sdk/clients/dynamodb';
 import { DynamoDbRepositoryImplementation } from './dynamo-db.repository.implementation';
+import * as DynamoDB from 'aws-sdk/clients/dynamodb';
 export declare class DynamoDbRepositoryProxy implements DynamoDbRepository {
     private dynamoDbRepository;
     private dynamoDbClient;

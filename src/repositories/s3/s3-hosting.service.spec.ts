@@ -205,17 +205,25 @@ describe('S3HostingService', () => {
 
         it('should set the bucket type to website hosting', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'createBucket').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', [
+                'listBuckets', 'createBucket', 'waitFor', 'upload', 'putBucketPolicy', 'putBucketWebsite'
+            ]);
+            mockedS3.listBuckets.and.returnValue({
+                promise: () => Promise.resolve({Buckets: []})
+            });
+            mockedS3.createBucket.and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            spyOn(mockedS3, 'upload').and.returnValue({
+            mockedS3.waitFor.and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            spyOn(mockedS3, 'putBucketPolicy').and.returnValue({
+            mockedS3.upload.and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            spyOn(mockedS3, 'putBucketWebsite').and.returnValue({
+            mockedS3.putBucketPolicy.and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            mockedS3.putBucketWebsite.and.returnValue({
                 promise: () => Promise.resolve({})
             });
             const hostingService = new S3HostingService('toto', true, mockedS3);

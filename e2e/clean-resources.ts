@@ -1,7 +1,7 @@
 import { DeleteTableInput } from 'aws-sdk/clients/dynamodb';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
-import SNS = require('aws-sdk/clients/sns');
-import S3 = require('aws-sdk/clients/s3');
+import * as DynamoDB from 'aws-sdk/clients/dynamodb';
+import * as SNS from 'aws-sdk/clients/sns';
+import * as S3 from 'aws-sdk/clients/s3';
 
 const cleanResources = (): Promise<any> => {
     console.log('Cleaning resources...');

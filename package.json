@@ -9,8 +9,7 @@
     "dist"
   ],
   "scripts": {
-    "prebuild": "rimraf dist",
-    "build": "tsc && rollup -c rollup.config.js && rimraf compiled",
+    "build": "tsc",
     "test": "ts-node ./spec/runner.ts",
     "e2e-prerequisite": "aws dynamodb create-table --table-name dynamo-db-module-e2e --attribute-definitions AttributeName=id,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 --query TableDescription.TableArn --output text --region eu-west-1 && aws sns create-topic --name sns-module-e2e --region eu-west-1",
     "e2e": "AWS_REGION=eu-west-1 ts-node ./e2e/runner.ts && AWS_REGION=eu-west-1 ts-node ./e2e/clean-resources.ts",
@@ -63,17 +62,13 @@
     "jasmine": "^2.8.0",
     "jasmine-reporters": "^2.2.1",
     "jasmine-spec-reporter": "^4.2.1",
-    "nodemon": "^1.12.1",
+    "needle": "^2.1.0",
     "nyc": "^11.3.0",
-    "rimraf": "^2.6.1",
-    "rollup": "^0.52.0",
-    "rollup-plugin-commonjs": "^8.0.2",
-    "rollup-plugin-json": "^2.3.0",
-    "rollup-plugin-node-resolve": "^3.0.0",
-    "rollup-plugin-sourcemaps": "^0.4.2",
+    "ts-loader": "^3.2.0",
     "ts-node": "^4.0.1",
     "tslint": "^5.4.3",
-    "typescript": "^2.3.4"
+    "typescript": "^2.3.4",
+    "webpack": "^3.10.0"
   },
   "dependencies": {
     "aws-sdk": "^2.169.0"
