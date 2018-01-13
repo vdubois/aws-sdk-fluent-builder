@@ -3,7 +3,7 @@ import S3 = require('aws-sdk/clients/s3');
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
 
-const bucketName = 's3-configuration-module-e2e';
+const bucketName = 's3-configuration-module-e2e-tests';
 
 describe('S3 Configuration module', () => {
 
