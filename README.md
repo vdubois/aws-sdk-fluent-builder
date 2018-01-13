@@ -77,6 +77,5 @@ hostingService.uploadFilesFromDirectory('/directory/path')
 
 ## Todos
 
-* Fix packaging
 * Fix S3 Configuration Service
 * Add Cognito repository
