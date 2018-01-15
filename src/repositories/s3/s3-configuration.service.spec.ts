@@ -30,12 +30,15 @@ describe('S3ConfigurationService', () => {
 
         it('should get a value from an overriden configuration', done => {
             // GIVEN
-            const mockedS3 = jasmine.createSpyObj('S3', ['getObject', 'upload']);
+            const mockedS3 = jasmine.createSpyObj('S3', ['getObject', 'upload', 'waitFor']);
             mockedS3.getObject.and.returnValue({
                 promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({key: 'value'}))})
             });
             mockedS3.upload.and.returnValue({
                 promise: () => Promise.resolve({})
+            });
+            mockedS3.waitFor.and.returnValue({
+                promise: () => Promise.resolve()
             });
             const configurationService = new S3ConfigurationService(
                 'toto', 'config.json', {we: `don't care`}, false, mockedS3);
@@ -157,14 +160,17 @@ describe('S3ConfigurationService', () => {
                 });
         });
 
-        it('should get all value from an overriden configuration', done => {
+        it('should get all values from an overriden configuration', done => {
             // GIVEN
-            const mockedS3 = jasmine.createSpyObj('S3', ['getObject', 'upload']);
+            const mockedS3 = jasmine.createSpyObj('S3', ['getObject', 'upload', 'waitFor']);
             mockedS3.getObject.and.returnValue({
                 promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({key: 'value'}))})
             });
             mockedS3.upload.and.returnValue({
                 promise: () => Promise.resolve({})
+            });
+            mockedS3.waitFor.and.returnValue({
+                promise: () => Promise.resolve()
             });
             const configurationService = new S3ConfigurationService(
                 'toto', 'config.json', {we: `don't care`}, false, mockedS3);
