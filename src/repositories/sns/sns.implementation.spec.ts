@@ -1,5 +1,4 @@
 import { SnsImplementation } from './sns.implementation';
-import SNS = require('aws-sdk/clients/sns');
 
 describe('SnsImplementation', () => {
 
@@ -7,14 +6,14 @@ describe('SnsImplementation', () => {
 
         it('should call publish function from aws sdk', done => {
             // GIVEN
-            const mockedSns = new SNS();
-            spyOn(mockedSns, 'listTopics').and.returnValue({
+            const mockedSns = jasmine.createSpyObj('SNS', ['listTopics', 'createTopic', 'publish']);
+            mockedSns.listTopics.and.returnValue({
                 promise: () => Promise.resolve({Topics: [{TopicArn: 'test-arn'}]})
             });
-            spyOn(mockedSns, 'createTopic').and.returnValue({
+            mockedSns.createTopic.and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            spyOn(mockedSns, 'publish').and.returnValue({
+            mockedSns.publish.and.returnValue({
                 promise: () => Promise.resolve({})
             });
 

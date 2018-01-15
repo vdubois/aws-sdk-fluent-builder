@@ -1,6 +1,5 @@
 import { SnsProxy } from './sns.proxy';
 import { SnsImplementation } from './sns.implementation';
-import SNS = require('aws-sdk/clients/sns');
 
 describe('SnsProxy', () => {
 
@@ -8,16 +7,16 @@ describe('SnsProxy', () => {
 
         it('should call publish function from aws sdk after calling topic creation and topic does not exist', done => {
             // GIVEN
-            const mockedSns = new SNS();
-            spyOn(mockedSns, 'listTopics').and.returnValues({
+            const mockedSns = jasmine.createSpyObj('SNS', ['listTopics', 'createTopic', 'publish']);
+            mockedSns.listTopics.and.returnValues({
                 promise: () => Promise.resolve({Topics: [{TopicArn: 'arn'}]})
             }, {
                 promise: () => Promise.resolve({Topics: [{TopicArn: 'arn'}, {TopicArn: 'test'}]})
             });
-            spyOn(mockedSns, 'createTopic').and.returnValue({
+            mockedSns.createTopic.and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            spyOn(mockedSns, 'publish').and.returnValue({
+            mockedSns.publish.and.returnValue({
                 promise: () => Promise.resolve({})
             });
 
@@ -44,14 +43,14 @@ describe('SnsProxy', () => {
 
         it('should call publish function from aws sdk after calling topic creation and topic does exist', done => {
             // GIVEN
-            const mockedSns = new SNS();
-            spyOn(mockedSns, 'listTopics').and.returnValue({
+            const mockedSns = jasmine.createSpyObj('SNS', ['listTopics', 'createTopic', 'publish']);
+            mockedSns.listTopics.and.returnValue({
                 promise: () => Promise.resolve({Topics: [{TopicArn: 'test'}]})
             });
-            spyOn(mockedSns, 'createTopic').and.returnValue({
+            mockedSns.createTopic.and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            spyOn(mockedSns, 'publish').and.returnValue({
+            mockedSns.publish.and.returnValue({
                 promise: () => Promise.resolve({})
             });
 

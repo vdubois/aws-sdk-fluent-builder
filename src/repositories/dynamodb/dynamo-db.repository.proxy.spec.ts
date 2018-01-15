@@ -2,7 +2,6 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { DynamoDbTableCaracteristicsModel } from '../../models/dynamo-db-table-caracteristics.model';
 import { DynamoDbRepositoryImplementation } from './dynamo-db.repository.implementation';
 import { DynamoDbRepositoryProxy } from './dynamo-db.repository.proxy';
-import DynamoDB = require('aws-sdk/clients/dynamodb');
 
 describe('DynamoDbRepositoryProxy', () => {
 
@@ -13,20 +12,20 @@ describe('DynamoDbRepositoryProxy', () => {
             const caracteristics: DynamoDbTableCaracteristicsModel = {
                 tableName: 'toto'
             };
-            const mockedDynamoDb = new DynamoDB();
-            spyOn(mockedDynamoDb, 'listTables').and.returnValues({
+            const mockedDynamoDb = jasmine.createSpyObj('DynamoDB', ['listTables', 'createTable', 'waitFor']);
+            mockedDynamoDb.listTables.and.returnValues({
                 promise: () => Promise.resolve({TableNames: []})
             }, {
                 promise: () => Promise.resolve({TableNames: ['toto']})
             });
-            spyOn(mockedDynamoDb, 'createTable').and.returnValue({
+            mockedDynamoDb.createTable.and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            spyOn(mockedDynamoDb, 'waitFor').and.returnValue({
+            mockedDynamoDb.waitFor.and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            const mockedDocumentClient = new DocumentClient();
-            spyOn(mockedDocumentClient, 'scan').and.returnValue({
+            const mockedDocumentClient = jasmine.createSpyObj('DocumentClient', ['scan']);
+            mockedDocumentClient.scan.and.returnValue({
                 promise: () => Promise.resolve({Items: [{myProperty: 'myValue'}]})
             });
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
@@ -55,18 +54,18 @@ describe('DynamoDbRepositoryProxy', () => {
             const caracteristics: DynamoDbTableCaracteristicsModel = {
                 tableName: 'toto'
             };
-            const mockedDynamoDb = new DynamoDB();
-            spyOn(mockedDynamoDb, 'listTables').and.returnValue({
+            const mockedDynamoDb = jasmine.createSpyObj('DynamoDB', ['listTables', 'createTable', 'waitFor']);
+            mockedDynamoDb.listTables.and.returnValue({
                 promise: () => Promise.resolve({TableNames: ['toto']})
             });
-            spyOn(mockedDynamoDb, 'createTable').and.returnValue({
+            mockedDynamoDb.createTable.and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            spyOn(mockedDynamoDb, 'waitFor').and.returnValue({
+            mockedDynamoDb.waitFor.and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            const mockedDocumentClient = new DocumentClient();
-            spyOn(mockedDocumentClient, 'scan').and.returnValue({
+            const mockedDocumentClient = jasmine.createSpyObj('DocumentClient', ['scan']);
+            mockedDocumentClient.scan.and.returnValue({
                 promise: () => Promise.resolve({Items: [{myProperty: 'myValue'}]})
             });
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
@@ -98,12 +97,12 @@ describe('DynamoDbRepositoryProxy', () => {
             const caracteristics: DynamoDbTableCaracteristicsModel = {
                 tableName: 'toto'
             };
-            const mockedDynamoDb = new DynamoDB();
-            spyOn(mockedDynamoDb, 'createTable').and.returnValue({
+            const mockedDynamoDb = jasmine.createSpyObj('DynamoDB', ['createTable']);
+            mockedDynamoDb.createTable.and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            const mockedDocumentClient = new DocumentClient();
-            spyOn(mockedDocumentClient, 'get').and.returnValue({
+            const mockedDocumentClient = jasmine.createSpyObj('DocumentClient', ['get']);
+            mockedDocumentClient.get.and.returnValue({
                 promise: () => Promise.resolve({Item: {myProperty: 'myValue'}})
             });
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
@@ -133,12 +132,12 @@ describe('DynamoDbRepositoryProxy', () => {
             const caracteristics: DynamoDbTableCaracteristicsModel = {
                 tableName: 'toto'
             };
-            const mockedDynamoDb = new DynamoDB();
-            spyOn(mockedDynamoDb, 'createTable').and.returnValue({
+            const mockedDynamoDb = jasmine.createSpyObj('DynamoDB', ['createTable']);
+            mockedDynamoDb.createTable.and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            const mockedDocumentClient = new DocumentClient();
-            spyOn(mockedDocumentClient, 'scan').and.returnValue({
+            const mockedDocumentClient = jasmine.createSpyObj('DocumentClient', ['scan']);
+            mockedDocumentClient.scan.and.returnValue({
                 promise: () => Promise.resolve({Items: [{myProperty: 'myValue'}]})
             });
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
@@ -168,12 +167,12 @@ describe('DynamoDbRepositoryProxy', () => {
             const caracteristics: DynamoDbTableCaracteristicsModel = {
                 tableName: 'toto'
             };
-            const mockedDynamoDb = new DynamoDB();
-            spyOn(mockedDynamoDb, 'createTable').and.returnValue({
+            const mockedDynamoDb = jasmine.createSpyObj('DynamoDB', ['createTable', 'put']);
+            mockedDynamoDb.createTable.and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            const mockedDocumentClient = new DocumentClient();
-            spyOn(mockedDocumentClient, 'put').and.returnValue({
+            const mockedDocumentClient = jasmine.createSpyObj('DocumentClient', ['put']);
+            mockedDocumentClient.put.and.returnValue({
                 promise: () => Promise.resolve({})
             });
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
@@ -209,12 +208,12 @@ describe('DynamoDbRepositoryProxy', () => {
                 tableName: 'toto',
                 keyName: 'id'
             };
-            const mockedDynamoDb = new DynamoDB();
-            spyOn(mockedDynamoDb, 'createTable').and.returnValue({
+            const mockedDynamoDb = jasmine.createSpyObj('DynamoDB', ['createTable']);
+            mockedDynamoDb.createTable.and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            const mockedDocumentClient = new DocumentClient();
-            spyOn(mockedDocumentClient, 'delete').and.returnValue({
+            const mockedDocumentClient = jasmine.createSpyObj('DocumentClient', ['delete']);
+            mockedDocumentClient.delete.and.returnValue({
                 promise: () => Promise.resolve({})
             });
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
@@ -250,12 +249,12 @@ describe('DynamoDbRepositoryProxy', () => {
                 tableName: 'toto',
                 keyName: 'id'
             };
-            const mockedDynamoDb = new DynamoDB();
-            spyOn(mockedDynamoDb, 'createTable').and.returnValue({
+            const mockedDynamoDb = jasmine.createSpyObj('DynamoDB', ['createTable']);
+            mockedDynamoDb.createTable.and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            const mockedDocumentClient = new DocumentClient();
-            spyOn(mockedDocumentClient, 'scan').and.returnValue({
+            const mockedDocumentClient = jasmine.createSpyObj('DocumentClient', ['scan', 'delete']);
+            mockedDocumentClient.scan.and.returnValue({
                 promise: () => Promise.resolve({
                     Items: [
                         {
@@ -268,7 +267,7 @@ describe('DynamoDbRepositoryProxy', () => {
                         }
                     ]})
             });
-            spyOn(mockedDocumentClient, 'delete').and.returnValue({
+            mockedDocumentClient.delete.and.returnValue({
                 promise: () => Promise.resolve({})
             });
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);

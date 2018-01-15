@@ -1,5 +1,4 @@
 import { S3ConfigurationService } from './s3-configuration.service';
-import S3 = require('aws-sdk/clients/s3');
 
 describe('S3ConfigurationService', () => {
 
@@ -7,8 +6,8 @@ describe('S3ConfigurationService', () => {
 
         it('should get a value from configuration', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'getObject').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['getObject']);
+            mockedS3.getObject.and.returnValue({
                 promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({key: 'value'}))})
             });
             const configurationService = new S3ConfigurationService(
@@ -31,11 +30,11 @@ describe('S3ConfigurationService', () => {
 
         it('should get a value from an overriden configuration', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'getObject').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['getObject', 'upload']);
+            mockedS3.getObject.and.returnValue({
                 promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({key: 'value'}))})
             });
-            spyOn(mockedS3, 'upload').and.returnValue({
+            mockedS3.upload.and.returnValue({
                 promise: () => Promise.resolve({})
             });
             const configurationService = new S3ConfigurationService(
@@ -64,8 +63,8 @@ describe('S3ConfigurationService', () => {
 
         it('should throw an error if a key does not exist', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'getObject').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['getObject']);
+            mockedS3.getObject.and.returnValue({
                 promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({}))})
             });
             const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, false, mockedS3);
@@ -86,8 +85,8 @@ describe('S3ConfigurationService', () => {
 
         it('should load remote file just one time when requesting keys', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'getObject').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['getObject']);
+            mockedS3.getObject.and.returnValue({
                 promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({key: 'value'}))})
             });
             const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, false, mockedS3);
@@ -110,8 +109,8 @@ describe('S3ConfigurationService', () => {
 
         it('should throw an error if file does not exist in bucket', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'getObject').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['getObject']);
+            mockedS3.getObject.and.returnValue({
                 promise: () => Promise.reject({})
             });
             const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, false, mockedS3);
@@ -137,8 +136,8 @@ describe('S3ConfigurationService', () => {
 
         it('should get all values from configuration', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'getObject').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['getObject']);
+            mockedS3.getObject.and.returnValue({
                 promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({key: 'value', key2: 'value'}))})
             });
             const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, false, mockedS3);
@@ -160,11 +159,11 @@ describe('S3ConfigurationService', () => {
 
         it('should get all value from an overriden configuration', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'getObject').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['getObject', 'upload']);
+            mockedS3.getObject.and.returnValue({
                 promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({key: 'value'}))})
             });
-            spyOn(mockedS3, 'upload').and.returnValue({
+            mockedS3.upload.and.returnValue({
                 promise: () => Promise.resolve({})
             });
             const configurationService = new S3ConfigurationService(
@@ -192,8 +191,8 @@ describe('S3ConfigurationService', () => {
 
         it('should load remote file just one time when requesting configuration', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'getObject').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['getObject']);
+            mockedS3.getObject.and.returnValue({
                 promise: () => Promise.resolve({Body: new Buffer(JSON.stringify({key: 'value'}))})
             });
             const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, false, mockedS3);
@@ -215,8 +214,8 @@ describe('S3ConfigurationService', () => {
 
         it('should throw an error if file does not exist in bucket', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'getObject').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['getObject']);
+            mockedS3.getObject.and.returnValue({
                 promise: () => Promise.reject({})
             });
             const configurationService = new S3ConfigurationService('toto', 'config.json', undefined, false, mockedS3);

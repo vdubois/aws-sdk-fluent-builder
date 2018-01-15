@@ -1,5 +1,4 @@
 import { S3HostingService } from './s3-hosting.service';
-import S3 = require('aws-sdk/clients/s3');
 
 describe('S3HostingService', () => {
 
@@ -7,8 +6,8 @@ describe('S3HostingService', () => {
 
         it('should throw an error if directory to copy does not exist', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'upload').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['upload']);
+            mockedS3.upload.and.returnValue({
                 promise: () => Promise.resolve({})
             });
             const hostingService = new S3HostingService('toto', false, mockedS3);
@@ -28,8 +27,8 @@ describe('S3HostingService', () => {
 
         it('should throw an error if given path is not a directory', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'upload').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['upload']);
+            mockedS3.upload.and.returnValue({
                 promise: () => Promise.resolve({})
             });
             const hostingService = new S3HostingService('toto', false, mockedS3);
@@ -50,8 +49,8 @@ describe('S3HostingService', () => {
 
         it('should throw an error if given destination path starts with a separator', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'upload').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['upload']);
+            mockedS3.upload.and.returnValue({
                 promise: () => Promise.resolve({})
             });
             const hostingService = new S3HostingService('toto', false, mockedS3);
@@ -71,8 +70,8 @@ describe('S3HostingService', () => {
 
         it('should throw an error if given destination path does not end with a separator', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'upload').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['upload']);
+            mockedS3.upload.and.returnValue({
                 promise: () => Promise.resolve({})
             });
             const hostingService = new S3HostingService('toto', false, mockedS3);
@@ -92,14 +91,14 @@ describe('S3HostingService', () => {
 
         it('should throw an error if aws sdk returns an error', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'upload').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['upload', 'putBucketPolicy', 'putBucketWebsite']);
+            mockedS3.upload.and.returnValue({
                 promise: () => Promise.reject('upload error')
             });
-            spyOn(mockedS3, 'putBucketPolicy').and.returnValue({
+            mockedS3.putBucketPolicy.and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            spyOn(mockedS3, 'putBucketWebsite').and.returnValue({
+            mockedS3.putBucketWebsite.and.returnValue({
                 promise: () => Promise.resolve({})
             });
             const hostingService = new S3HostingService('toto', false, mockedS3);
@@ -120,14 +119,14 @@ describe('S3HostingService', () => {
 
         it('should upload files with a call to aws sdk if there are no errors', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'upload').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['upload', 'putBucketPolicy', 'putBucketWebsite']);
+            mockedS3.upload.and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            spyOn(mockedS3, 'putBucketPolicy').and.returnValue({
+            mockedS3.putBucketPolicy.and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            spyOn(mockedS3, 'putBucketWebsite').and.returnValue({
+            mockedS3.putBucketWebsite.and.returnValue({
                 promise: () => Promise.resolve({})
             });
             const hostingService = new S3HostingService('toto', false, mockedS3);
@@ -162,14 +161,14 @@ describe('S3HostingService', () => {
 
         it('should upload files to a subdirectory with a call to aws sdk if there are no errors', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'upload').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['upload', 'putBucketPolicy', 'putBucketWebsite']);
+            mockedS3.upload.and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            spyOn(mockedS3, 'putBucketPolicy').and.returnValue({
+            mockedS3.putBucketPolicy.and.returnValue({
                 promise: () => Promise.resolve({})
             });
-            spyOn(mockedS3, 'putBucketWebsite').and.returnValue({
+            mockedS3.putBucketWebsite.and.returnValue({
                 promise: () => Promise.resolve({})
             });
             const hostingService = new S3HostingService('toto', false, mockedS3);

@@ -1,4 +1,3 @@
-import S3 = require('aws-sdk/clients/s3');
 import { ListObjectsOutput } from 'aws-sdk/clients/s3';
 import { S3StorageService } from './s3-storage.service';
 
@@ -8,8 +7,8 @@ describe('S3StorageService', () => {
 
         it('should get an empty list if aws sdk return no files', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'listObjects').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['listObjects']);
+            mockedS3.listObjects.and.returnValue({
                 promise: () => Promise.resolve({Contents: []})
             });
             const storageService = new S3StorageService('toto', false, mockedS3);
@@ -30,8 +29,8 @@ describe('S3StorageService', () => {
 
         it('should get one file if aws sdk returns one file', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'listObjects').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['listObjects']);
+            mockedS3.listObjects.and.returnValue({
                 promise: () => Promise.resolve({Contents: [{Key: 'test.file'}]} as ListObjectsOutput)
             });
             const storageService = new S3StorageService('toto', false, mockedS3);
@@ -53,8 +52,8 @@ describe('S3StorageService', () => {
 
         it('should get one file if aws sdk returns multiple files but we provide a predicate', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'listObjects').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['listObjects']);
+            mockedS3.listObjects.and.returnValue({
                 promise: () => Promise.resolve({Contents: [{Key: 'test.file'}, {Key: 'test2.txt'}]} as ListObjectsOutput)
             });
             const storageService = new S3StorageService('toto', false, mockedS3);
@@ -76,8 +75,8 @@ describe('S3StorageService', () => {
 
         it('should throw an error if aws sdk throws an error', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'listObjects').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['listObjects']);
+            mockedS3.listObjects.and.returnValue({
                 promise: () => Promise.reject('Error when listing files')
             });
             const storageService = new S3StorageService('toto', false, mockedS3);
@@ -103,8 +102,8 @@ describe('S3StorageService', () => {
 
         it('should load file contents when load file from aws sdk works fine', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'getObject').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['getObject']);
+            mockedS3.getObject.and.returnValue({
                 promise: () => Promise.resolve({Body: 'content'})
             });
             const storageService = new S3StorageService('toto', false, mockedS3);
@@ -125,8 +124,8 @@ describe('S3StorageService', () => {
 
         it('should throw an error when load file from aws sdk thrown an error', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'getObject').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['getObject']);
+            mockedS3.getObject.and.returnValue({
                 promise: () => Promise.reject('read error')
             });
             const storageService = new S3StorageService('toto', false, mockedS3);
@@ -150,8 +149,8 @@ describe('S3StorageService', () => {
 
         it('should write file contents when upload from aws sdk works fine', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'upload').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['upload']);
+            mockedS3.upload.and.returnValue({
                 promise: () => Promise.resolve({})
             });
             const storageService = new S3StorageService('toto', false, mockedS3);
@@ -171,8 +170,8 @@ describe('S3StorageService', () => {
 
         it('should throw an error if aws sdk throws an error', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'upload').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['upload']);
+            mockedS3.upload.and.returnValue({
                 promise: () => Promise.reject('write error')
             });
             const storageService = new S3StorageService('toto', false, mockedS3);
@@ -196,8 +195,8 @@ describe('S3StorageService', () => {
 
         it('should throw an error if aws sdk throws an error', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'deleteObject').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['deleteObject']);
+            mockedS3.deleteObject.and.returnValue({
                 promise: () => Promise.reject('delete error')
             });
             const storageService = new S3StorageService('toto', false, mockedS3);
@@ -218,8 +217,8 @@ describe('S3StorageService', () => {
 
         it('should delete file with a call to aws sdk', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'deleteObject').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['deleteObject']);
+            mockedS3.deleteObject.and.returnValue({
                 promise: () => Promise.resolve({})
             });
             const storageService = new S3StorageService('toto', false, mockedS3);
@@ -246,8 +245,8 @@ describe('S3StorageService', () => {
 
         it('should throw an error if aws sdk throws an error', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'copyObject').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['copyObject']);
+            mockedS3.copyObject.and.returnValue({
                 promise: () => Promise.reject('copy error')
             });
             const storageService = new S3StorageService('toto', false, mockedS3);
@@ -268,8 +267,8 @@ describe('S3StorageService', () => {
 
         it('should throw an error if source and destination have same paths', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'copyObject').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['copyObject']);
+            mockedS3.copyObject.and.returnValue({
                 promise: () => Promise.resolve({})
             });
             const storageService = new S3StorageService('toto', false, mockedS3);
@@ -290,8 +289,8 @@ describe('S3StorageService', () => {
 
         it('should copy file with a call to aws sdk', done => {
             // GIVEN
-            const mockedS3 = new S3();
-            spyOn(mockedS3, 'copyObject').and.returnValue({
+            const mockedS3 = jasmine.createSpyObj('S3', ['copyObject']);
+            mockedS3.copyObject.and.returnValue({
                 promise: () => Promise.resolve({})
             });
             const storageService = new S3StorageService('toto', false, mockedS3);
