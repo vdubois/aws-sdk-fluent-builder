@@ -1,10 +1,12 @@
 import * as S3 from 'aws-sdk/clients/s3';
+import { trace } from '../../utils/log';
 
 export class S3StorageService {
 
     constructor(private bucketName: string,
                 private mustCreateBeforeUse: boolean,
                 private s3Client = new S3({ region: process.env.AWS_REGION })) {
+      trace('Creating S3 Storage service with S3 params : ' + JSON.stringify({region: process.env.AWS_REGION}));
     }
 
     /**
@@ -14,7 +16,11 @@ export class S3StorageService {
      */
     listFiles(predicate = (file) => true): Promise<any> {
         return this.createBucketIfNecesary()
-            .then(() => this.s3Client.listObjects({Bucket: this.bucketName}).promise())
+            .then(() => {
+              let params = {Bucket: this.bucketName};
+              trace('Calling listObjects with : ' + JSON.stringify(params));
+              return this.s3Client.listObjects(params).promise();
+            })
             .then(files => files.Contents.map(file => file.Key))
             .then(filesNames => filesNames.filter(predicate))
             .catch(exception => {
