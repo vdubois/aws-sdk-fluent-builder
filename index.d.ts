@@ -14,3 +14,5 @@ export * from './src/builders/sns/sns.builder';
 export * from './src/repositories/sns/sns.implementation';
 export * from './src/repositories/sns/sns.proxy';
 export * from './src/repositories/sns/sns';
+export * from './src/builders/lambda/lambda.builder';
+export * from './src/repositories/lambda/lambda.function';

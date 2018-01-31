@@ -19,3 +19,6 @@ __export(require("./src/repositories/s3/s3-storage.service"));
 __export(require("./src/builders/sns/sns.builder"));
 __export(require("./src/repositories/sns/sns.implementation"));
 __export(require("./src/repositories/sns/sns.proxy"));
+// Lambda
+__export(require("./src/builders/lambda/lambda.builder"));
+__export(require("./src/repositories/lambda/lambda.function"));
