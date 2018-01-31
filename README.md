@@ -75,7 +75,10 @@ hostingService.uploadFilesFromDirectory('/directory/path')
   .then(result => console.log(result));
 ```
 
-## Todos
+### Lambda
 
-* Fix S3 Configuration Service
-* Add Cognito repository
+```js
+const lambdaService = new LambdaBuilder().withName('my-lambda-name').build;
+lambdaService.invoke({attr: 'value'}) // no need to create the payload object
+  .then(result => console.log(result));
+```
