@@ -82,3 +82,9 @@ const lambdaService = new LambdaBuilder().withName('my-lambda-name').build;
 lambdaService.invoke({attr: 'value'}) // no need to create the payload object
   .then(result => console.log(result));
 ```
+
+## Todos
+
+* [FIX] S3 Hosting which generates a 403 error
+* Differentiate hash key and range key for DynamoDB
+* Handle autoscaling with DynamoDB
