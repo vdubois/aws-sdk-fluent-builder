@@ -1,5 +1,5 @@
-import { GetObjectRequest } from 'aws-sdk/clients/s3';
 import * as S3 from 'aws-sdk/clients/s3';
+import { GetObjectRequest } from 'aws-sdk/clients/s3';
 
 export class S3ConfigurationService {
 
@@ -20,15 +20,13 @@ export class S3ConfigurationService {
      * @param {string} configurationKey
      * @returns {Promise<any>}
      */
-    get(configurationKey: string): Promise<any> {
-        return this.loadConfiguration()
-            .then(configuration => {
-                if (configuration[configurationKey] !== undefined) {
-                    return Promise.resolve(configuration[configurationKey]);
-                } else {
-                    throw new Error(`No key '${configurationKey}' present in configuration`);
-                }
-            });
+    async get(configurationKey: string): Promise<any> {
+        const configuration = await this.loadConfiguration();
+        if (configuration[configurationKey] !== undefined) {
+            return Promise.resolve(configuration[configurationKey]);
+        } else {
+            throw new Error(`No key '${configurationKey}' present in configuration`);
+        }
     }
 
     /**
@@ -39,56 +37,50 @@ export class S3ConfigurationService {
         return this.loadConfiguration();
     }
 
-    private createBucketIfNecesary(): Promise<any> {
+    private async createBucketIfNecesary(): Promise<any> {
         if (this.mustCreateBeforeUse) {
-            return this.s3Client.listBuckets().promise()
-                .then(results => results.Buckets)
-                .then(buckets => {
-                    if (buckets.some(bucket => bucket.Name === this.bucketName)) {
-                        return Promise.resolve({});
-                    } else {
-                        return this.s3Client.createBucket({Bucket: this.bucketName}).promise()
-                            .then(() => this.s3Client.waitFor('bucketExists', {Bucket: this.bucketName}));
-                    }
-                });
+            const { Buckets } = await this.s3Client.listBuckets().promise();
+            if (Buckets.some(bucket => bucket.Name === this.bucketName)) {
+                return Promise.resolve({});
+            } else {
+                await this.s3Client.createBucket({Bucket: this.bucketName}).promise();
+                return this.s3Client.waitFor('bucketExists', {Bucket: this.bucketName});
+            }
         } else {
             return Promise.resolve({});
         }
     }
 
-    private overrideConfiguration(): Promise<any> {
+    private async overrideConfiguration(): Promise<any> {
         if (this.contents) {
-            return this.s3Client.upload({
+            await this.s3Client.upload({
                 Bucket: this.bucketName,
                 Key: this.fileName,
                 Body: JSON.stringify(this.contents, null, 2)
-            }).promise()
-                .then(() => this.s3Client.waitFor('objectExists', {Bucket: this.bucketName, Key: this.fileName}));
+            }).promise();
+            return this.s3Client.waitFor('objectExists', {Bucket: this.bucketName, Key: this.fileName});
         } else {
             return Promise.resolve({});
         }
     }
 
-    private loadConfiguration(): Promise<any> {
+    private async loadConfiguration(): Promise<any> {
         if (this.configuration) {
             return Promise.resolve(this.configuration);
         } else {
-            return this.createBucketIfNecesary()
-                .then(() => this.overrideConfiguration())
-                .then(() => {
-                    const getObjectParams: GetObjectRequest = {
-                        Bucket: this._bucketName,
-                        Key: this.fileName
-                    };
-                    return this.s3Client.getObject(getObjectParams).promise();
-                })
-                .then(result => {
-                    this.configuration = JSON.parse(result.Body.toString());
-                    return this.configuration;
-                })
-                .catch(exception => {
-                    throw new Error(`${this.fileName} file does not exist in bucket`);
-                });
+            await this.createBucketIfNecesary();
+            await this.overrideConfiguration();
+            try {
+                const getObjectParams: GetObjectRequest = {
+                    Bucket: this._bucketName,
+                    Key: this.fileName
+                };
+                const result = await this.s3Client.getObject(getObjectParams).promise();
+                this.configuration = JSON.parse(result.Body.toString());
+                return this.configuration;
+            } catch (error) {
+                throw new Error(`${this.fileName} file does not exist in bucket`);
+            }
         }
     }
 }

@@ -33,15 +33,14 @@ export class DynamoDbRepositoryImplementation implements DynamoDbRepository {
     return this.scan(scanParams);
   }
 
-  findById(id: string): Promise<any> {
+  async findById(id: string): Promise<any> {
     const getParams: any = {
       TableName: this.tableName,
     };
     getParams.Key = {};
     getParams.Key[this.keyName] = id;
-    return this.dynamoDbClient.get(getParams)
-      .promise()
-      .then(getResult => getResult.Item);
+    const result = await this.dynamoDbClient.get(getParams).promise();
+    return result.Item;
   }
 
   findBy(field: string, value: string): Promise<Array<any>> {
@@ -73,24 +72,24 @@ export class DynamoDbRepositoryImplementation implements DynamoDbRepository {
     return this.dynamoDbClient.delete(deleteParams).promise();
   }
 
-  deleteAll(): Promise<any> {
-    return this.findAll()
-      .then(items => Promise.all(items.map(item => this.deleteById(item[this.keyName]))));
+  async deleteAll(): Promise<void> {
+    const items = await this.findAll();
+    for (const item of items) {
+      await this.deleteById(item[this.keyName]);
+    }
   }
 
-  private scan(scanParams: ScanInput, alreadyScannedItems?: Array<any>): Promise<any> {
+  private async scan(scanParams: ScanInput, alreadyScannedItems?: Array<any>): Promise<any> {
     const scannedItems: Array<any> = alreadyScannedItems || [];
     scanParams.ConsistentRead = true;
-    return this.dynamoDbClient.scan(scanParams).promise()
-      .then(result => {
-        scannedItems.push(result.Items);
-        if (result.LastEvaluatedKey) {
-          scanParams.ExclusiveStartKey = result.LastEvaluatedKey;
-          return this.scan(scanParams, scannedItems);
-        } else {
-          return Promise.resolve(this.flattenArray(scannedItems));
-        }
-      });
+    const result = await this.dynamoDbClient.scan(scanParams).promise();
+    scannedItems.push(result.Items);
+    if (result.LastEvaluatedKey) {
+      scanParams.ExclusiveStartKey = result.LastEvaluatedKey;
+      return this.scan(scanParams, scannedItems);
+    } else {
+      return Promise.resolve(this.flattenArray(scannedItems));
+    }
   }
 
   private flattenArray(arrayOfArray): Array<any> {

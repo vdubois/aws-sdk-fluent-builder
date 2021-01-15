@@ -20,8 +20,8 @@ const dynamoDbRepository = new DynamoDbBuilder()
   .createIfNotExists()
   .build();
 
-dynamoDbRepository.findAll()
-  .then(results => console.log(results));
+const results = await dynamoDbRepository.findAll();
+console.log(results);
 ```
 
 ### SNS
@@ -32,7 +32,7 @@ const sns = new SnsBuilder()
   .createIfNotExists()
   .build();
 
-sns.publishMessage({
+await sns.publishMessage({
   type: 'ProductAddedToCart',
   date: '2017-12-20 20:21:35',
   version: '1',
@@ -49,8 +49,8 @@ const configurationService = new S3Builder()
   .asConfigurationService()
   .build();
 
-configurationService.get('configurationKey')
-  .then(configurationValue => console.log(configurationValue));
+const configurationValue = await configurationService.get('configurationKey');
+console.log(configurationValue);
 ```
 
 ```js
@@ -60,8 +60,8 @@ const storageService = new S3Builder()
   .asStorageService()
   .build();
 
-storageService.listFiles()
-  .then(files => console.console.log(files));
+const files = await storageService.listFiles();
+console.console.log(files);
 ```
 
 ```js
@@ -71,20 +71,16 @@ const hostingService = new S3Builder()
   .asHostingService()
   .build();
 
-hostingService.uploadFilesFromDirectory('/directory/path')
-  .then(result => console.log(result));
+await hostingService.uploadFilesFromDirectory('/directory/path');
 ```
 
 ### Lambda
 
 ```js
 const lambdaService = new LambdaBuilder().withName('my-lambda-name').build;
-lambdaService.invoke({attr: 'value'}) // no need to create the payload object
-  .then(result => console.log(result));
+const result = await lambdaService.invoke({attr: 'value'}); // no need to create the payload object
 ```
 
 ## Todos
 
 * [FIX] S3 Hosting which generates a 403 error
-* Differentiate hash key and range key for DynamoDB
-* Handle autoscaling with DynamoDB

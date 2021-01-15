@@ -5,7 +5,7 @@ describe('DynamoDbRepositoryImplementation', () => {
 
     describe('findAll function', () => {
 
-        it('should return transformed information from aws sdk', done => {
+        it('should return transformed information from aws sdk', async (done) => {
             // GIVEN
             const caracteristics: DynamoDbTableCaracteristicsModel = {
                 tableName: 'toto'
@@ -16,24 +16,23 @@ describe('DynamoDbRepositoryImplementation', () => {
             });
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
 
-            // WHEN
-            dynamoDbRepositoryImplementation.findAll()
-                .then(result => {
-                    // THEN
-                    expect(result).not.toBeNull();
-                    expect(result).toEqual([{myProperty: 'myValue'}]);
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
-                });
+            try {
+                // WHEN
+                const result = await dynamoDbRepositoryImplementation.findAll();
+                // THEN
+                expect(result).not.toBeNull();
+                expect(result).toEqual([{myProperty: 'myValue'}]);
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
     });
 
     describe('findById function', () => {
 
-        it('should return transformed information from aws sdk', done => {
+        it('should return transformed information from aws sdk', async (done) => {
             // GIVEN
             const caracteristics: DynamoDbTableCaracteristicsModel = {
                 tableName: 'toto'
@@ -44,24 +43,23 @@ describe('DynamoDbRepositoryImplementation', () => {
             });
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
 
-            // WHEN
-            dynamoDbRepositoryImplementation.findById('2')
-                .then(result => {
-                    // THEN
-                    expect(result).not.toBeNull();
-                    expect(result).toEqual({myProperty: 'myValue'});
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
-                });
+            try {
+                // WHEN
+                const result = await dynamoDbRepositoryImplementation.findById('2');
+                // THEN
+                expect(result).not.toBeNull();
+                expect(result).toEqual({myProperty: 'myValue'});
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
     });
 
     describe('findBy function', () => {
 
-        it('should return transformed information from aws sdk', done => {
+        it('should return transformed information from aws sdk', async (done) => {
             // GIVEN
             const caracteristics: DynamoDbTableCaracteristicsModel = {
                 tableName: 'toto'
@@ -72,24 +70,23 @@ describe('DynamoDbRepositoryImplementation', () => {
             });
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
 
-            // WHEN
-            dynamoDbRepositoryImplementation.findBy('field', 'value')
-                .then(result => {
-                    // THEN
-                    expect(result).not.toBeNull();
-                    expect(result).toEqual([{myProperty: 'myValue'}]);
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
-                });
+            try {
+                // WHEN
+                const result = await dynamoDbRepositoryImplementation.findBy('field', 'value');
+                // THEN
+                expect(result).not.toBeNull();
+                expect(result).toEqual([{myProperty: 'myValue'}]);
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
     });
 
     describe('save function', () => {
 
-        it('should call put function from aws sdk', done => {
+        it('should call put function from aws sdk', async (done) => {
             // GIVEN
             const caracteristics: DynamoDbTableCaracteristicsModel = {
                 tableName: 'toto'
@@ -100,29 +97,28 @@ describe('DynamoDbRepositoryImplementation', () => {
             });
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
 
-            // WHEN
-            dynamoDbRepositoryImplementation.save({myField: 'myValue'})
-                .then(result => {
-                    // THEN
-                    expect(result).not.toBeNull();
-                    expect(mockedDocumentClient.put).toHaveBeenCalledWith({
-                        TableName: 'toto',
-                        Item: {
-                            myField: 'myValue'
-                        }
-                    });
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
+            try {
+                // WHEN
+                const result = await dynamoDbRepositoryImplementation.save({myField: 'myValue'});
+                // THEN
+                expect(result).not.toBeNull();
+                expect(mockedDocumentClient.put).toHaveBeenCalledWith({
+                    TableName: 'toto',
+                    Item: {
+                        myField: 'myValue'
+                    }
                 });
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
     });
 
     describe('deleteById function', () => {
 
-        it('should call delete function from aws sdk', done => {
+        it('should call delete function from aws sdk', async (done) => {
             // GIVEN
             const caracteristics: DynamoDbTableCaracteristicsModel = {
                 tableName: 'toto',
@@ -134,29 +130,28 @@ describe('DynamoDbRepositoryImplementation', () => {
             });
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
 
-            // WHEN
-            dynamoDbRepositoryImplementation.deleteById('2')
-                .then(result => {
-                    // THEN
-                    expect(result).not.toBeNull();
-                    expect(mockedDocumentClient.delete).toHaveBeenCalledWith({
-                        TableName: 'toto',
-                        Key: {
-                            'id': '2'
-                        }
-                    });
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
+            try {
+                // WHEN
+                const result = await dynamoDbRepositoryImplementation.deleteById('2');
+                // THEN
+                expect(result).not.toBeNull();
+                expect(mockedDocumentClient.delete).toHaveBeenCalledWith({
+                    TableName: 'toto',
+                    Key: {
+                        'id': '2'
+                    }
                 });
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
     });
 
     describe('deleteAll function', () => {
 
-        it('should call delete function from aws sdk for all items', done => {
+        it('should call delete function from aws sdk for all items', async (done) => {
             // GIVEN
             const caracteristics: DynamoDbTableCaracteristicsModel = {
                 tableName: 'toto',
@@ -181,19 +176,18 @@ describe('DynamoDbRepositoryImplementation', () => {
             });
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
 
-            // WHEN
-            dynamoDbRepositoryImplementation.deleteAll()
-                .then(result => {
-                    // THEN
-                    expect(result).not.toBeNull();
-                    expect(mockedDocumentClient.scan).toHaveBeenCalled();
-                    expect(mockedDocumentClient.delete).toHaveBeenCalledTimes(2);
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
-                });
+            try {
+                // WHEN
+                const result = await dynamoDbRepositoryImplementation.deleteAll();
+                // THEN
+                expect(result).not.toBeNull();
+                expect(mockedDocumentClient.scan).toHaveBeenCalled();
+                expect(mockedDocumentClient.delete).toHaveBeenCalledTimes(2);
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
     });
 });

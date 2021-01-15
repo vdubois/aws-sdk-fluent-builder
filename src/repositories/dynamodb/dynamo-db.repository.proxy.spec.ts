@@ -7,7 +7,7 @@ describe('DynamoDbRepositoryProxy', () => {
 
     describe('findAll function', () => {
 
-        it('should return transformed information from aws sdk after calling creation and table does not exist', done => {
+        it('should return transformed information from aws sdk after calling creation and table does not exist', async (done) => {
             // GIVEN
             const caracteristics: DynamoDbTableCaracteristicsModel = {
                 tableName: 'toto'
@@ -31,25 +31,24 @@ describe('DynamoDbRepositoryProxy', () => {
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
             const dynamoDbRepositoryProxy = new DynamoDbRepositoryProxy(dynamoDbRepositoryImplementation, mockedDynamoDb);
 
-            // WHEN
-            dynamoDbRepositoryProxy.findAll()
-                .then(result => {
-                    // THEN
-                    expect(result).not.toBeNull();
-                    expect(result).toEqual([{myProperty: 'myValue'}]);
-                    expect(mockedDynamoDb.listTables).toHaveBeenCalledTimes(1);
-                    expect(mockedDynamoDb.createTable).toHaveBeenCalledTimes(1);
-                    expect(mockedDocumentClient.scan).toHaveBeenCalledTimes(1);
-                    expect(mockedDocumentClient.scan).toHaveBeenCalledWith({TableName: 'toto'});
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
-                });
+            try {
+                // WHEN
+                const result = await dynamoDbRepositoryProxy.findAll();
+                // THEN
+                expect(result).not.toBeNull();
+                expect(result).toEqual([{myProperty: 'myValue'}]);
+                expect(mockedDynamoDb.listTables).toHaveBeenCalledTimes(1);
+                expect(mockedDynamoDb.createTable).toHaveBeenCalledTimes(1);
+                expect(mockedDocumentClient.scan).toHaveBeenCalledTimes(1);
+                expect(mockedDocumentClient.scan).toHaveBeenCalledWith({TableName: 'toto', ConsistentRead: true});
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
 
-        it('should return transformed information from aws sdk after calling creation and table does exist', done => {
+        it('should return transformed information from aws sdk after calling creation and table does exist', async (done) => {
             // GIVEN
             const caracteristics: DynamoDbTableCaracteristicsModel = {
                 tableName: 'toto'
@@ -71,28 +70,27 @@ describe('DynamoDbRepositoryProxy', () => {
             const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
             const dynamoDbRepositoryProxy = new DynamoDbRepositoryProxy(dynamoDbRepositoryImplementation, mockedDynamoDb);
 
-            // WHEN
-            dynamoDbRepositoryProxy.findAll()
-                .then(result => {
-                    // THEN
-                    expect(result).not.toBeNull();
-                    expect(result).toEqual([{myProperty: 'myValue'}]);
-                    expect(mockedDynamoDb.listTables).toHaveBeenCalledTimes(1);
-                    expect(mockedDynamoDb.createTable).toHaveBeenCalledTimes(0);
-                    expect(mockedDocumentClient.scan).toHaveBeenCalledTimes(1);
-                    expect(mockedDocumentClient.scan).toHaveBeenCalledWith({TableName: 'toto'});
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
-                });
+            try {
+                // WHEN
+                const result = await dynamoDbRepositoryProxy.findAll();
+                // THEN
+                expect(result).not.toBeNull();
+                expect(result).toEqual([{myProperty: 'myValue'}]);
+                expect(mockedDynamoDb.listTables).toHaveBeenCalledTimes(1);
+                expect(mockedDynamoDb.createTable).toHaveBeenCalledTimes(0);
+                expect(mockedDocumentClient.scan).toHaveBeenCalledTimes(1);
+                expect(mockedDocumentClient.scan).toHaveBeenCalledWith({TableName: 'toto', ConsistentRead: true});
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
     });
 
     describe('findById function', () => {
 
-        it('should return transformed information from aws sdk after calling creation', done => {
+        it('should return transformed information from aws sdk after calling creation', async (done) => {
             // GIVEN
             const caracteristics: DynamoDbTableCaracteristicsModel = {
                 tableName: 'toto'
@@ -109,25 +107,23 @@ describe('DynamoDbRepositoryProxy', () => {
             const dynamoDbRepositoryProxy = new DynamoDbRepositoryProxy(dynamoDbRepositoryImplementation, mockedDynamoDb);
             spyOn(dynamoDbRepositoryProxy, 'createIfNotExists').and.returnValue(Promise.resolve());
 
-            // WHEN
-            dynamoDbRepositoryProxy.findById('3')
-                .then(result => {
-                    // THEN
-                    expect(result).not.toBeNull();
-                    expect(result).toEqual({myProperty: 'myValue'});
-                    expect(dynamoDbRepositoryProxy.createIfNotExists).toHaveBeenCalled();
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
-                });
+            try { // WHEN
+                const result = await dynamoDbRepositoryProxy.findById('3');
+                // THEN
+                expect(result).not.toBeNull();
+                expect(result).toEqual({myProperty: 'myValue'});
+                expect(dynamoDbRepositoryProxy.createIfNotExists).toHaveBeenCalled();
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
     });
 
     describe('findBy function', () => {
 
-        it('should return transformed information from aws sdk after calling creation', done => {
+        it('should return transformed information from aws sdk after calling creation', async (done) => {
             // GIVEN
             const caracteristics: DynamoDbTableCaracteristicsModel = {
                 tableName: 'toto'
@@ -144,25 +140,24 @@ describe('DynamoDbRepositoryProxy', () => {
             const dynamoDbRepositoryProxy = new DynamoDbRepositoryProxy(dynamoDbRepositoryImplementation, mockedDynamoDb);
             spyOn(dynamoDbRepositoryProxy, 'createIfNotExists').and.returnValue(Promise.resolve());
 
-            // WHEN
-            dynamoDbRepositoryProxy.findBy('field', 'value')
-                .then(result => {
-                    // THEN
-                    expect(result).not.toBeNull();
-                    expect(result).toEqual([{myProperty: 'myValue'}]);
-                    expect(dynamoDbRepositoryProxy.createIfNotExists).toHaveBeenCalled();
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
-                });
+            try {
+                // WHEN
+                const result = await dynamoDbRepositoryProxy.findBy('field', 'value');
+                // THEN
+                expect(result).not.toBeNull();
+                expect(result).toEqual([{myProperty: 'myValue'}]);
+                expect(dynamoDbRepositoryProxy.createIfNotExists).toHaveBeenCalled();
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
     });
 
     describe('save function', () => {
 
-        it('should call put function from aws sdk after calling creation', done => {
+        it('should call put function from aws sdk after calling creation', async (done) => {
             // GIVEN
             const caracteristics: DynamoDbTableCaracteristicsModel = {
                 tableName: 'toto'
@@ -179,30 +174,28 @@ describe('DynamoDbRepositoryProxy', () => {
             const dynamoDbRepositoryProxy = new DynamoDbRepositoryProxy(dynamoDbRepositoryImplementation, mockedDynamoDb);
             spyOn(dynamoDbRepositoryProxy, 'createIfNotExists').and.returnValue(Promise.resolve());
 
-            // WHEN
-            dynamoDbRepositoryProxy.save({myField: 'myValue'})
-                .then(result => {
-                    // THEN
-                    expect(result).not.toBeNull();
-                    expect(dynamoDbRepositoryProxy.createIfNotExists).toHaveBeenCalled();
-                    expect(mockedDocumentClient.put).toHaveBeenCalledWith({
-                        TableName: 'toto',
-                        Item: {
-                            myField: 'myValue'
-                        }
-                    });
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
+            try {
+                // WHEN
+                const result = await dynamoDbRepositoryProxy.save({myField: 'myValue'});
+                expect(result).not.toBeNull();
+                expect(dynamoDbRepositoryProxy.createIfNotExists).toHaveBeenCalled();
+                expect(mockedDocumentClient.put).toHaveBeenCalledWith({
+                    TableName: 'toto',
+                    Item: {
+                        myField: 'myValue'
+                    }
                 });
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
     });
 
     describe('deleteById function', () => {
 
-        it('should call delete function from aws sdk after calling creation', done => {
+        it('should call delete function from aws sdk after calling creation', async (done) => {
             // GIVEN
             const caracteristics: DynamoDbTableCaracteristicsModel = {
                 tableName: 'toto',
@@ -220,30 +213,29 @@ describe('DynamoDbRepositoryProxy', () => {
             const dynamoDbRepositoryProxy = new DynamoDbRepositoryProxy(dynamoDbRepositoryImplementation, mockedDynamoDb);
             spyOn(dynamoDbRepositoryProxy, 'createIfNotExists').and.returnValue(Promise.resolve());
 
-            // WHEN
-            dynamoDbRepositoryProxy.deleteById('2')
-                .then(result => {
-                    // THEN
-                    expect(result).not.toBeNull();
-                    expect(dynamoDbRepositoryProxy.createIfNotExists).toHaveBeenCalled();
-                    expect(mockedDocumentClient.delete).toHaveBeenCalledWith({
-                        TableName: 'toto',
-                        Key: {
-                            id: '2'
-                        }
-                    });
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
+            try {
+                // WHEN
+                const result = await dynamoDbRepositoryProxy.deleteById('2');
+                // THEN
+                expect(result).not.toBeNull();
+                expect(dynamoDbRepositoryProxy.createIfNotExists).toHaveBeenCalled();
+                expect(mockedDocumentClient.delete).toHaveBeenCalledWith({
+                    TableName: 'toto',
+                    Key: {
+                        id: '2'
+                    }
                 });
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
     });
 
     describe('deleteAll function', () => {
 
-        it('should call delete function from aws sdk for all items after calling creation', done => {
+        it('should call delete function from aws sdk for all items after calling creation', async (done) => {
             // GIVEN
             const caracteristics: DynamoDbTableCaracteristicsModel = {
                 tableName: 'toto',
@@ -274,19 +266,18 @@ describe('DynamoDbRepositoryProxy', () => {
             const dynamoDbRepositoryProxy = new DynamoDbRepositoryProxy(dynamoDbRepositoryImplementation, mockedDynamoDb);
             spyOn(dynamoDbRepositoryProxy, 'createIfNotExists').and.returnValue(Promise.resolve());
 
-            // WHEN
-            dynamoDbRepositoryProxy.deleteAll()
-                .then(result => {
-                    // THEN
-                    expect(result).not.toBeNull();
-                    expect(dynamoDbRepositoryProxy.createIfNotExists).toHaveBeenCalled();
-                    expect(mockedDocumentClient.delete).toHaveBeenCalledTimes(2);
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
-                });
+            try {
+                // WHEN
+                const result = await dynamoDbRepositoryProxy.deleteAll();
+                // THEN
+                expect(result).not.toBeNull();
+                expect(dynamoDbRepositoryProxy.createIfNotExists).toHaveBeenCalled();
+                expect(mockedDocumentClient.delete).toHaveBeenCalledTimes(2);
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
     });
 });

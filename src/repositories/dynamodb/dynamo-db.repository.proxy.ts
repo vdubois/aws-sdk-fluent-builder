@@ -6,11 +6,10 @@ import * as DynamoDB from 'aws-sdk/clients/dynamodb';
 export class DynamoDbRepositoryProxy implements DynamoDbRepository {
 
     constructor(private dynamoDbRepository: DynamoDbRepositoryImplementation,
-                private dynamoDbClient: DynamoDB = new DynamoDB({region: process.env.AWS_REGION})) {
-
+        private dynamoDbClient: DynamoDB = new DynamoDB({region: process.env.AWS_REGION})) {
     }
 
-    createIfNotExists(): Promise<any> {
+    async createIfNotExists(): Promise<any> {
         const createTableParams: CreateTableInput = {
             TableName: this.dynamoDbRepository.tableName,
             AttributeDefinitions: [{
@@ -26,44 +25,42 @@ export class DynamoDbRepositoryProxy implements DynamoDbRepository {
                 WriteCapacityUnits: this.dynamoDbRepository.writeCapacity
             }
         };
-        return this.dynamoDbClient.listTables().promise()
-            .then(results => {
-                if (results.TableNames.some(name => this.dynamoDbRepository.tableName === name)) {
-                    return Promise.resolve({});
-                } else {
-                    return this.dynamoDbClient.createTable(createTableParams).promise()
-                        .then(() => this.dynamoDbClient.waitFor('tableExists', {TableName: this.dynamoDbRepository.tableName}).promise());
-                }
-            });
+        const results = await this.dynamoDbClient.listTables().promise();
+        if (results.TableNames.some(name => this.dynamoDbRepository.tableName === name)) {
+            return Promise.resolve({});
+        } else {
+            await this.dynamoDbClient.createTable(createTableParams).promise();
+            return this.dynamoDbClient.waitFor('tableExists', {TableName: this.dynamoDbRepository.tableName}).promise();
+        }
     }
 
-    findAll(): Promise<Array<any>> {
-        return this.createIfNotExists()
-            .then(() => this.dynamoDbRepository.findAll());
+    async findAll(): Promise<Array<any>> {
+        await this.createIfNotExists();
+        return this.dynamoDbRepository.findAll();
     }
 
-    findById(id: string): Promise<any> {
-        return this.createIfNotExists()
-            .then(() => this.dynamoDbRepository.findById(id));
+    async findById(id: string): Promise<any> {
+        await this.createIfNotExists();
+        return this.dynamoDbRepository.findById(id);
     }
 
-    findBy(field: string, value: string): Promise<Array<any>> {
-        return this.createIfNotExists()
-            .then(() => this.dynamoDbRepository.findBy(field, value));
+    async findBy(field: string, value: string): Promise<Array<any>> {
+        await this.createIfNotExists();
+        return this.dynamoDbRepository.findBy(field, value);
     }
 
-    save(entity: object): Promise<any> {
-        return this.createIfNotExists()
-            .then(() => this.dynamoDbRepository.save(entity));
+    async save(entity: object): Promise<any> {
+        await this.createIfNotExists();
+        return this.dynamoDbRepository.save(entity);
     }
 
-    deleteById(id: string): Promise<any> {
-        return this.createIfNotExists()
-            .then(() => this.dynamoDbRepository.deleteById(id));
+    async deleteById(id: string): Promise<any> {
+        await this.createIfNotExists();
+        return this.dynamoDbRepository.deleteById(id);
     }
 
-    deleteAll(): Promise<any> {
-        return this.createIfNotExists()
-            .then(() => this.dynamoDbRepository.deleteAll());
+    async deleteAll(): Promise<any> {
+        await this.createIfNotExists();
+        return this.dynamoDbRepository.deleteAll();
     }
 }

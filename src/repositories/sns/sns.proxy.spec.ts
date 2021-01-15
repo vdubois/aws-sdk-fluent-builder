@@ -5,7 +5,7 @@ describe('SnsProxy', () => {
 
     describe('publishMessage function', () => {
 
-        it('should call publish function from aws sdk after calling topic creation and topic does not exist', done => {
+        it('should call publish function from aws sdk after calling topic creation and topic does not exist', async done => {
             // GIVEN
             const mockedSns = jasmine.createSpyObj('SNS', ['listTopics', 'createTopic', 'publish']);
             mockedSns.listTopics.and.returnValues({
@@ -22,26 +22,25 @@ describe('SnsProxy', () => {
 
             // WHEN
             const sns = new SnsProxy(new SnsImplementation('test', mockedSns), mockedSns);
-            sns.publishMessage({test: 'value'})
-                .then(() => {
-                    // THEN
-                    expect(mockedSns.listTopics).toHaveBeenCalledTimes(2);
-                    expect(mockedSns.createTopic).toHaveBeenCalledTimes(1);
-                    expect(mockedSns.createTopic).toHaveBeenCalledWith({Name: 'test'});
-                    expect(mockedSns.publish).toHaveBeenCalledTimes(1);
-                    expect(mockedSns.publish).toHaveBeenCalledWith({
-                        TopicArn: 'test',
-                        Message: JSON.stringify({test: 'value'})
-                    });
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
+            try {
+                await sns.publishMessage({test: 'value'});
+                // THEN
+                expect(mockedSns.listTopics).toHaveBeenCalledTimes(2);
+                expect(mockedSns.createTopic).toHaveBeenCalledTimes(1);
+                expect(mockedSns.createTopic).toHaveBeenCalledWith({Name: 'test'});
+                expect(mockedSns.publish).toHaveBeenCalledTimes(1);
+                expect(mockedSns.publish).toHaveBeenCalledWith({
+                    TopicArn: 'test',
+                    Message: JSON.stringify({test: 'value'})
                 });
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
 
-        it('should call publish function from aws sdk after calling topic creation and topic does exist', done => {
+        it('should call publish function from aws sdk after calling topic creation and topic does exist', async done => {
             // GIVEN
             const mockedSns = jasmine.createSpyObj('SNS', ['listTopics', 'createTopic', 'publish']);
             mockedSns.listTopics.and.returnValue({
@@ -56,22 +55,21 @@ describe('SnsProxy', () => {
 
             // WHEN
             const sns = new SnsProxy(new SnsImplementation('test', mockedSns), mockedSns);
-            sns.publishMessage({test: 'value'})
-                .then(() => {
-                    // THEN
-                    expect(mockedSns.listTopics).toHaveBeenCalledTimes(2);
-                    expect(mockedSns.createTopic).toHaveBeenCalledTimes(0);
-                    expect(mockedSns.publish).toHaveBeenCalledTimes(1);
-                    expect(mockedSns.publish).toHaveBeenCalledWith({
-                        TopicArn: 'test',
-                        Message: JSON.stringify({test: 'value'})
-                    });
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
+            try {
+                await sns.publishMessage({test: 'value'});
+                // THEN
+                expect(mockedSns.listTopics).toHaveBeenCalledTimes(2);
+                expect(mockedSns.createTopic).toHaveBeenCalledTimes(0);
+                expect(mockedSns.publish).toHaveBeenCalledTimes(1);
+                expect(mockedSns.publish).toHaveBeenCalledWith({
+                    TopicArn: 'test',
+                    Message: JSON.stringify({test: 'value'})
                 });
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
     });
 });

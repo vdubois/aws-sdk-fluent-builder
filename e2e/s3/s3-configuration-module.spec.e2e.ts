@@ -1,5 +1,6 @@
 import { S3Builder } from '../../src/builders/s3/s3.builder';
 import S3 = require('aws-sdk/clients/s3');
+import { deleteBucketIfExists } from '../clean-functions';
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
 
@@ -19,7 +20,7 @@ describe('S3 Configuration module', () => {
 
     describe('createIfNotExists function', () => {
 
-        it('should create the bucket if it does not exist', done => {
+        it('should create the bucket if it does not exist', async done => {
             // GIVEN
             const configurationService = new S3Builder()
                 .withBucketName(bucketName)
@@ -27,27 +28,24 @@ describe('S3 Configuration module', () => {
                 .asConfigurationService()
                 .withContents({test: 'value'})
                 .build();
-            deleteBucketIfExists()
-                // WHEN
-                .then(() => configurationService.get('test'))
-                .then(value => {
-                    // THEN
-                    expect(value).not.toBeNull();
-                    expect(value).toEqual('value');
-                    return listBuckets();
-                })
-                .then(buckets => {
-                    expect(buckets).not.toBeNull();
-                    expect(buckets).toContain(bucketName);
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
-                });
+            await deleteBucketIfExists('s3-configuration-module-e2e-tests');
+
+            try {
+                const value = await configurationService.get('test');
+                // THEN
+                expect(value).not.toBeNull();
+                expect(value).toEqual('value');
+                const buckets = await listBuckets();
+                expect(buckets).not.toBeNull();
+                expect(buckets).toContain(bucketName);
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
 
-        it('should not throw an error if the bucket already exist', done => {
+        it('should not throw an error if the bucket already exist', async done => {
             // GIVEN
             const configurationService = new S3Builder()
                 .withBucketName(bucketName)
@@ -55,98 +53,94 @@ describe('S3 Configuration module', () => {
                 .asConfigurationService()
                 .withContents({test: 'value'})
                 .build();
-            createBucketIfNotExists()
-                // WHEN
-                .then(() => configurationService.get('test'))
-                .then(value => {
-                    // THEN
-                    expect(value).not.toBeNull();
-                    expect(value).toEqual('value');
-                    return listBuckets();
-                })
-                .then(buckets => {
-                    expect(buckets).not.toBeNull();
-                    expect(buckets).toContain(bucketName);
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
-                });
+            await createBucketIfNotExists('s3-configuration-module-e2e-tests');
+
+            try {
+                const value = await configurationService.get('test');
+                // THEN
+                expect(value).not.toBeNull();
+                expect(value).toEqual('value');
+                const buckets = await listBuckets();
+                expect(buckets).not.toBeNull();
+                expect(buckets).toContain(bucketName);
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
     });
 
     describe('get function', () => {
 
-        it('should throw an error if the bucket does not contain the config file', done => {
+        it('should throw an error if the bucket does not contain the config file', async done => {
             // GIVEN
             const configurationService = new S3Builder()
                 .withBucketName(bucketName)
                 .createIfNotExists()
                 .asConfigurationService()
                 .build();
-            emptyBucket()
+            await emptyBucket(bucketName);
+            try {
                 // WHEN
-                .then(() => configurationService.get('test'))
-                .then(() => {
-                    fail('we should never reach here because config file is missing from bucket');
-                    done();
-                })
-                .catch(exception => {
-                    // THEN
-                    expect(exception).not.toBeNull();
-                    expect(exception.message).toEqual('config.json file does not exist in bucket');
-                    done();
-                });
+                await configurationService.get('test');
+                fail('we should never reach here because config file is missing from bucket');
+                done();
+            } catch (exception) {
+                // THEN
+                expect(exception).not.toBeNull();
+                expect(exception.message).toEqual('config.json file does not exist in bucket');
+                done();
+            }
         });
 
-        it('should throw an error if the bucket contains a config file that does not contain config value', done => {
+        it('should throw an error if the bucket contains a config file that does not contain config value', async done => {
             // GIVEN
             const configurationService = new S3Builder()
                 .withBucketName(bucketName)
                 .createIfNotExists()
                 .asConfigurationService()
                 .build();
-            emptyBucket()
-                .then(() => uploadEmptyConfigFile())
+
+            await emptyBucket(bucketName);
+            await uploadEmptyConfigFile();
+            try {
                 // WHEN
-                .then(() => configurationService.get('test'))
-                .then(() => {
-                    fail('we should never reach here because config file is empty');
-                    done();
-                })
-                .catch(exception => {
-                    // THEN
-                    expect(exception).not.toBeNull();
-                    expect(exception.message).toEqual(`No key 'test' present in configuration`);
-                    done();
-                });
+                await configurationService.get('test');
+                fail('we should never reach here because config file is empty');
+                done();
+            } catch (exception) {
+                // THEN
+                expect(exception).not.toBeNull();
+                expect(exception.message).toEqual(`No key 'test' present in configuration`);
+                done();
+            }
         });
 
-        it('should get a config value if config file is present and contains the config value', done => {
+        it('should get a config value if config file is present and contains the config value', async done => {
             // GIVEN
             const configurationService = new S3Builder()
                 .withBucketName(bucketName)
                 .createIfNotExists()
                 .asConfigurationService()
                 .build();
-            emptyBucket()
-                .then(() => uploadConfigFile())
+
+            await emptyBucket(bucketName);
+            await uploadConfigFile();
+            try {
                 // WHEN
-                .then(() => configurationService.get('test'))
-                .then(value => {
-                    // THEN
-                    expect(value).not.toBeNull();
-                    expect(value).toEqual('value');
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
-                });
+                const value = await configurationService.get('test');
+                // THEN
+                expect(value).not.toBeNull();
+                expect(value).toEqual('value');
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
 
-        it('should get an overriden config value if configuration was overriden with an object', done => {
+        it('should get an overriden config value if configuration was overriden with an object', async done => {
             // GIVEN
             const configurationService = new S3Builder()
                 .withBucketName(bucketName)
@@ -154,23 +148,23 @@ describe('S3 Configuration module', () => {
                 .asConfigurationService()
                 .withContents({test: 'overriden value'})
                 .build();
-            emptyBucket()
-                .then(() => uploadConfigFile())
+
+            await emptyBucket(bucketName);
+            await uploadConfigFile();
+            try {
                 // WHEN
-                .then(() => configurationService.get('test'))
-                .then(value => {
-                    // THEN
-                    expect(value).not.toBeNull();
-                    expect(value).toEqual('overriden value');
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
-                });
+                const value = await configurationService.get('test');
+                // THEN
+                expect(value).not.toBeNull();
+                expect(value).toEqual('overriden value');
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
 
-        it('should get an overriden config value if configuration was overriden with a file', done => {
+        it('should get an overriden config value if configuration was overriden with a file', async done => {
             // GIVEN
             const configurationService = new S3Builder()
                 .withBucketName(bucketName)
@@ -178,71 +172,69 @@ describe('S3 Configuration module', () => {
                 .asConfigurationService()
                 .withFileContents(__dirname + '/../data/config.json')
                 .build();
-            emptyBucket()
-                .then(() => uploadConfigFile())
+
+            await emptyBucket(bucketName);
+            await uploadConfigFile();
+            try {
                 // WHEN
-                .then(() => configurationService.get('test'))
-                .then(value => {
-                    // THEN
-                    expect(value).not.toBeNull();
-                    expect(value).toEqual('sample');
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
-                });
+                const value = await configurationService.get('test');
+                // THEN
+                expect(value).not.toBeNull();
+                expect(value).toEqual('sample');
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
     });
 
     describe('all function', () => {
 
-        it('should throw an error if the bucket does not contain the config file', done => {
+        it('should throw an error if the bucket does not contain the config file', async done => {
             // GIVEN
             const configurationService = new S3Builder()
                 .withBucketName(bucketName)
                 .createIfNotExists()
                 .asConfigurationService()
                 .build();
-            emptyBucket()
-            // WHEN
-                .then(() => configurationService.all())
-                .then(() => {
-                    fail('we should never reach here because config file is missing from bucket');
-                    done();
-                })
-                .catch(exception => {
-                    // THEN
-                    expect(exception).not.toBeNull();
-                    expect(exception.message).toEqual('config.json file does not exist in bucket');
-                    done();
-                });
+            await emptyBucket(bucketName);
+            try {
+                await configurationService.all();
+                fail('we should never reach here because config file is missing from bucket');
+                done();
+            } catch (exception) {
+                // THEN
+                expect(exception).not.toBeNull();
+                expect(exception.message).toEqual('config.json file does not exist in bucket');
+                done();
+            }
         });
 
-        it('should get all config values if config file is present and contains those config values', done => {
+        it('should get all config values if config file is present and contains those config values', async done => {
             // GIVEN
             const configurationService = new S3Builder()
                 .withBucketName(bucketName)
                 .createIfNotExists()
                 .asConfigurationService()
                 .build();
-            emptyBucket()
-                .then(() => uploadConfigFile())
+
+            try {
+                await emptyBucket(bucketName);
+                await uploadConfigFile();
                 // WHEN
-                .then(() => configurationService.all())
-                .then(value => {
-                    // THEN
-                    expect(value).not.toBeNull();
-                    expect(value).toEqual({test: 'value', test2: 'value2'});
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
-                });
+                const values = await configurationService.all();
+                // THEN
+                expect(values).not.toBeNull();
+                expect(values).toEqual({test: 'value', test2: 'value2'});
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
 
-        it('should get overriden config values if configuration was overriden with an object', done => {
+        it('should get overriden config values if configuration was overriden with an object', async done => {
             // GIVEN
             const configurationService = new S3Builder()
                 .withBucketName(bucketName)
@@ -250,23 +242,23 @@ describe('S3 Configuration module', () => {
                 .asConfigurationService()
                 .withContents({test: 'overriden value'})
                 .build();
-            emptyBucket()
-                .then(() => uploadConfigFile())
+
+            try {
+                await emptyBucket(bucketName);
+                await uploadConfigFile();
                 // WHEN
-                .then(() => configurationService.all())
-                .then(values => {
-                    // THEN
-                    expect(values).not.toBeNull();
-                    expect(values).toEqual({test: 'overriden value'});
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
-                });
+                const values = await configurationService.all();
+                // THEN
+                expect(values).not.toBeNull();
+                expect(values).toEqual({test: 'overriden value'});
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
 
-        it('should get overriden config values if configuration was overriden with a file', done => {
+        it('should get overriden config values if configuration was overriden with a file', async done => {
             // GIVEN
             const configurationService = new S3Builder()
                 .withBucketName(bucketName)
@@ -274,29 +266,30 @@ describe('S3 Configuration module', () => {
                 .asConfigurationService()
                 .withFileContents(__dirname + '/../data/config.json')
                 .build();
-            emptyBucket()
-                .then(() => uploadConfigFile())
+
+            try {
+                await emptyBucket(bucketName);
+                await uploadConfigFile();
                 // WHEN
-                .then(() => configurationService.all())
-                .then(value => {
-                    // THEN
-                    expect(value).not.toBeNull();
-                    expect(value).toEqual({test: 'sample', test2: false});
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
-                });
+                const value = await configurationService.all();
+                // THEN
+                expect(value).not.toBeNull();
+                expect(value).toEqual({test: 'sample', test2: false});
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
     });
 });
 
-const emptyBucket = (): Promise<any> => {
+export const emptyBucket = async (bucketNameToEmpty: string): Promise<void> => {
     const s3Client = new S3({ region: process.env.AWS_REGION });
-    return s3Client.listObjects({Bucket: bucketName}).promise()
-        .then(results =>
-            Promise.all(results.Contents.map(result => s3Client.deleteObject({Bucket: bucketName, Key: result.Key}).promise())));
+    const {Contents} = await s3Client.listObjects({Bucket: bucketNameToEmpty}).promise();
+    for (const result of Contents) {
+        await s3Client.deleteObject({Bucket: bucketNameToEmpty, Key: result.Key}).promise();
+    }
 };
 
 const uploadEmptyConfigFile = (): Promise<any> =>  {
@@ -309,43 +302,19 @@ const uploadConfigFile = (): Promise<any> =>  {
     return s3Client.upload({Bucket: bucketName, Key: 'config.json', Body: JSON.stringify({test: 'value', test2: 'value2'})}).promise();
 };
 
-const deleteBucketIfExists = () => {
+export const createBucketIfNotExists = async (bucketNameToCreate: string) => {
     const s3Client = new S3({ region: process.env.AWS_REGION });
-    return s3Client.listBuckets().promise()
-        .then(results => results.Buckets)
-        .then(bucketNames => {
-            if (bucketNames.some(bucket => bucket.Name === bucketName)) {
-                return s3Client.listObjects({Bucket: bucketName}).promise()
-                    .then(objects => objects.Contents)
-                    .then(objects => Promise.all(
-                        objects.map(s3Object => s3Client.deleteObject({
-                            Bucket: bucketName,
-                            Key: s3Object.Key
-                        }).promise())))
-                    .then(() => s3Client.deleteBucket({Bucket: bucketName}).promise())
-                    .then(() => s3Client.waitFor('bucketNotExists', {Bucket: bucketName}));
-            } else {
-                return Promise.resolve({});
-            }
-        });
+    const {Buckets} = await s3Client.listBuckets().promise();
+    if (Buckets.some(bucket => bucket.Name === bucketNameToCreate)) {
+        return Promise.resolve({});
+    } else {
+        await s3Client.createBucket({Bucket: bucketNameToCreate}).promise();
+        return s3Client.waitFor('bucketExists', {Bucket: bucketNameToCreate});
+    }
 };
 
-const createBucketIfNotExists = () => {
+export const listBuckets = async () => {
     const s3Client = new S3({ region: process.env.AWS_REGION });
-    return s3Client.listBuckets().promise()
-        .then(results => results.Buckets)
-        .then(bucketNames => {
-            if (bucketNames.some(bucket => bucket.Name === bucketName)) {
-                return Promise.resolve({});
-            } else {
-                return s3Client.createBucket({Bucket: bucketName}).promise()
-                    .then(() => s3Client.waitFor('bucketExists', {Bucket: bucketName}));
-            }
-        });
-};
-
-const listBuckets = () => {
-    const s3Client = new S3({ region: process.env.AWS_REGION });
-    return s3Client.listBuckets().promise()
-        .then(results => results.Buckets.map(bucket => bucket.Name));
+    const {Buckets} = await s3Client.listBuckets().promise();
+    return Buckets.map(bucket => bucket.Name);
 };

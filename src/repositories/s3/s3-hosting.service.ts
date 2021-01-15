@@ -8,52 +8,61 @@ export class S3HostingService {
     constructor(private bucketName: string, private mustCreateBeforeUse, private s3Client = new S3({region: process.env.AWS_REGION})) {
     }
 
-    uploadFilesFromDirectory(sourceDirectoryPath: string, destinationPathInBucket = ''): Promise<any> {
+    async uploadFilesFromDirectory(sourceDirectoryPath: string, destinationPathInBucket = ''): Promise<void> {
         if (!fs.existsSync(sourceDirectoryPath)) {
-            return Promise.reject('uploadFilesFromDirectory function : directory does not exist');
+            throw Error('uploadFilesFromDirectory function : directory does not exist');
         }
         if (!fs.statSync(sourceDirectoryPath).isDirectory()) {
-            return Promise.reject('uploadFilesFromDirectory function : ' + sourceDirectoryPath + ' is not a directory');
+            throw Error('uploadFilesFromDirectory function : ' + sourceDirectoryPath + ' is not a directory');
         }
         if (destinationPathInBucket.startsWith('/')) {
-            return Promise.reject(`uploadFilesFromDirectory function : destination path should not start with a '/'`);
+            throw Error(`uploadFilesFromDirectory function : destination path should not start with a '/'`);
         }
         if (destinationPathInBucket !== '' && !destinationPathInBucket.endsWith('/')) {
-            return Promise.reject(`uploadFilesFromDirectory function : destination path should end with a '/'`);
+            throw Error(`uploadFilesFromDirectory function : destination path should end with a '/'`);
         }
         const files = [].concat.apply([], this.walkDirectorySync(sourceDirectoryPath));
-        return this.createBucketIfNecesary()
-            .then(() => this.exposeBucketAsPublicWebsite())
-            .then(() => Promise.all(
-                files.map(file => this.s3Client.upload({
-                        Bucket: this.bucketName,
-                        Key: destinationPathInBucket + file.substring(path.normalize(sourceDirectoryPath).length + 1),
-                        Body: fs.readFileSync(file)
-                    }).promise())).catch(exception => {
-                        throw new Error(`uploadFilesFromDirectory function : ${exception}`);
-                    }));
+        await this.createBucketIfNecesary();
+        await this.exposeBucketAsPublicWebsite();
+        for (const file of files) {
+            await this.s3Client.upload({
+                Bucket: this.bucketName,
+                Key: destinationPathInBucket + file.substring(path.normalize(sourceDirectoryPath).length + 1),
+                Body: fs.readFileSync(file)
+            }).promise();
+        }
     }
 
-    private createBucketIfNecesary(): Promise<any> {
+    private async createBucketIfNecesary(): Promise<any> {
         if (this.mustCreateBeforeUse) {
-            return this.s3Client.listBuckets().promise()
-                .then(results => results.Buckets)
-                .then(buckets => {
-                    if (buckets.some(bucket => bucket.Name === this.bucketName)) {
-                        return Promise.resolve({});
-                    } else {
-                        return this.s3Client.createBucket({Bucket: this.bucketName}).promise()
-                            .then(() => this.s3Client.waitFor('bucketExists', {Bucket: this.bucketName}));
-                    }
-                });
+            const results = await this.s3Client.listBuckets().promise();
+            const buckets = results.Buckets;
+            if (buckets.some(bucket => bucket.Name === this.bucketName)) {
+                return Promise.resolve({});
+            } else {
+                await this.s3Client.createBucket({Bucket: this.bucketName}).promise();
+                return this.s3Client.waitFor('bucketExists', {Bucket: this.bucketName});
+            }
         } else {
             return Promise.resolve({});
         }
     }
 
-    private exposeBucketAsPublicWebsite(): Promise<any> {
-        let policyContent = fs.readFileSync(__dirname + '/s3-hosting.policy.json').toString();
-        policyContent = policyContent.replace(new RegExp(/\$bucketName\$/, 'g'), this.bucketName);
+    private async exposeBucketAsPublicWebsite(): Promise<any> {
+        const policyContent = `
+            {
+                "Version":"2012-10-17",
+                "Statement": [
+                    {
+                      "Sid":"PublicReadGetObject",
+                      "Effect":"Allow",
+                      "Principal": "*",
+                      "Action":["s3:GetObject"],
+                      "Resource":["arn:aws:s3:::${this.bucketName}/*"]
+                    }
+                ]
+            }
+        `.trim();
         const bucketPolicyParams: PutBucketPolicyRequest = {
           Bucket: this.bucketName,
           Policy: policyContent
@@ -66,8 +75,8 @@ export class S3HostingService {
                 }
             }
         };
-        return this.s3Client.putBucketPolicy(bucketPolicyParams).promise()
-            .then(() => this.s3Client.putBucketWebsite(bucketWebsiteParams).promise());
+        await this.s3Client.putBucketPolicy(bucketPolicyParams).promise();
+        return this.s3Client.putBucketWebsite(bucketWebsiteParams).promise();
     }
 
     private walkDirectorySync(directoryPath, filelist = []): Array<any> {

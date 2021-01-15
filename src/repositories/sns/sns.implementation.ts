@@ -6,19 +6,19 @@ export class SnsImplementation implements Sns {
     constructor(private _topicName: string, private snsClient = new SNS({ region: process.env.AWS_REGION })) {
     }
 
-    publishMessage(message: object): Promise<any> {
-        return this.findTopicArn()
-            .then(topicArn => this.snsClient.publish({
+    async publishMessage(message: object): Promise<any> {
+        const topicArn = await this.findTopicArn();
+        return this.snsClient.publish({
                 TopicArn: topicArn,
                 Message: JSON.stringify(message)
-            }).promise());
+            }).promise();
     }
 
-    private findTopicArn(): Promise<any> {
-        return this.snsClient.listTopics().promise()
-            .then(results => results.Topics.find(topic => topic.TopicArn.indexOf(this._topicName) !== -1))
-            .then(topic => topic.TopicArn);
+    private async findTopicArn(): Promise<any> {
+        const {Topics} = await this.snsClient.listTopics().promise();
+        return Topics.find(topic => topic.TopicArn.indexOf(this._topicName) !== -1).TopicArn;
     }
+
     get topicName(): string {
         return this._topicName;
     }

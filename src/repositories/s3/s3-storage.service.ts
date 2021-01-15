@@ -12,14 +12,16 @@ export class S3StorageService {
      * @param {(file) => boolean} predicate
      * @returns {Promise<any>}
      */
-    listFiles(predicate = (file) => true): Promise<any> {
-        return this.createBucketIfNecesary()
-            .then(() => this.s3Client.listObjects({Bucket: this.bucketName}).promise())
-            .then(files => files.Contents.map(file => file.Key))
-            .then(filesNames => filesNames.filter(predicate))
-            .catch(exception => {
-                throw new Error(`listFiles function : ${exception}`);
-            });
+    async listFiles(predicate = (file) => true): Promise<any> {
+        try {
+            await this.createBucketIfNecesary();
+            const {Contents} = await this.s3Client.listObjects({Bucket: this.bucketName}).promise();
+            return Contents
+                .map(file => file.Key)
+                .filter(predicate);
+        } catch (exception) {
+            throw new Error(`listFiles function : ${exception}`);
+        }
     }
 
     /**
@@ -27,16 +29,17 @@ export class S3StorageService {
      * @param {string} filePath
      * @returns {Promise<any>}
      */
-    readFile(filePath: string): Promise<any> {
-        return this.createBucketIfNecesary()
-            .then(() => this.s3Client.getObject({
+    async readFile(filePath: string): Promise<any> {
+        try {
+            await this.createBucketIfNecesary();
+            const file = await this.s3Client.getObject({
                 Bucket: this.bucketName,
                 Key: filePath
-            }).promise())
-            .then(file => file.Body)
-            .catch(exception => {
-                throw new Error(`readFile function : ${exception}`);
-            });
+            }).promise();
+            return file.Body;
+        } catch (exception) {
+            throw new Error(`readFile function : ${exception}`);
+        }
     }
 
     /**
@@ -45,16 +48,17 @@ export class S3StorageService {
      * @param {Buffer} fileContent
      * @returns {Promise<any>}
      */
-    writeFile(filePath: string, fileContent: Buffer): Promise<any> {
-        return this.createBucketIfNecesary()
-            .then(() => this.s3Client.upload({
+    async writeFile(filePath: string, fileContent: Buffer): Promise<any> {
+        try {
+            await this.createBucketIfNecesary();
+            return await this.s3Client.upload({
                 Bucket: this.bucketName,
                 Key: filePath,
                 Body: fileContent
-            }).promise())
-            .catch(exception => {
-                throw new Error(`writeFile function : ${exception}`);
-            });
+            }).promise();
+        } catch (exception) {
+            throw new Error(`writeFile function : ${exception}`);
+        }
     }
 
     /**
@@ -62,15 +66,16 @@ export class S3StorageService {
      * @param {string} filePath
      * @returns {Promise<any>}
      */
-    deleteFile(filePath: string): Promise<any> {
-        return this.createBucketIfNecesary()
-            .then(() => this.s3Client.deleteObject({
+    async deleteFile(filePath: string): Promise<any> {
+        try {
+            await this.createBucketIfNecesary();
+            return await this.s3Client.deleteObject({
                 Bucket: this.bucketName,
                 Key: filePath
-            }).promise())
-            .catch(exception => {
-                throw new Error(`deleteFile function : ${exception}`);
-            });
+            }).promise();
+        } catch (exception) {
+            throw new Error(`deleteFile function : ${exception}`);
+        }
     }
 
     /**
@@ -79,33 +84,31 @@ export class S3StorageService {
      * @param {string} destinationFilePath
      * @returns {Promise<any>}
      */
-    copyFile(sourceFilePath: string, destinationFilePath: string): Promise<any> {
+    async copyFile(sourceFilePath: string, destinationFilePath: string): Promise<any> {
         if (sourceFilePath === destinationFilePath) {
             return Promise.reject('copyFile function : source and destination must have different paths');
         }
-        return this.createBucketIfNecesary()
-            .then(() => this.s3Client.copyObject({
+        try {
+            await this.createBucketIfNecesary();
+            return await this.s3Client.copyObject({
                 Bucket: this.bucketName,
                 CopySource: `${this.bucketName}/${sourceFilePath}`,
                 Key: destinationFilePath
-            }).promise())
-            .catch(exception => {
-                throw new Error(`copyFile function : ${exception}`);
-            });
+            }).promise();
+        } catch (exception) {
+            throw new Error(`copyFile function : ${exception}`);
+        }
     }
 
-    private createBucketIfNecesary(): Promise<any> {
+    private async createBucketIfNecesary(): Promise<any> {
         if (this.mustCreateBeforeUse) {
-            return this.s3Client.listBuckets().promise()
-                .then(results => results.Buckets)
-                .then(buckets => {
-                    if (buckets.some(bucket => bucket.Name === this.bucketName)) {
-                        return Promise.resolve({});
-                    } else {
-                        return this.s3Client.createBucket({Bucket: this.bucketName}).promise()
-                            .then(() => this.s3Client.waitFor('bucketExists', {Bucket: this.bucketName}));
-                    }
-                });
+            const {Buckets} = await this.s3Client.listBuckets().promise();
+            if (Buckets.some(bucket => bucket.Name === this.bucketName)) {
+                return Promise.resolve({});
+            } else {
+                await this.s3Client.createBucket({Bucket: this.bucketName}).promise();
+                return this.s3Client.waitFor('bucketExists', {Bucket: this.bucketName});
+            }
         } else {
             return Promise.resolve({});
         }

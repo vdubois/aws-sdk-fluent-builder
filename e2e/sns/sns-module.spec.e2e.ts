@@ -1,5 +1,6 @@
 import SNS = require('aws-sdk/clients/sns');
 import { SnsBuilder } from '../../src/builders/sns/sns.builder';
+import { deleteTopicIfExist } from '../clean-functions';
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
 const topicName = 'sns-topic-e2e';
@@ -18,82 +19,66 @@ describe('SNS Module', () => {
 
     describe('createIfNotExists function', () => {
 
-        it('should create topic if it does not exist', done => {
+        it('should create topic if it does not exist', async done => {
             // GIVEN
             const sns = new SnsBuilder()
                 .withTopicName(topicName)
                 .createIfNotExists()
                 .build();
-            deleteTopicIfExist()
+            await deleteTopicIfExist();
+
+            try {
                 // WHEN
-                .then(() => sns.publishMessage({}))
-                .then(() => listTopics())
-                .then(topics => {
-                    // THEN
-                    const topicFound = topics.some(topic => topic.TopicArn.indexOf(topicName) !== -1);
-                    expect(topicFound).toBe(true);
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
-                });
+                await sns.publishMessage({});
+                const topics = await listTopics();
+
+                // THEN
+                const topicFound = topics.some(topic => topic.TopicArn.indexOf(topicName) !== -1);
+                expect(topicFound).toBe(true);
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
 
-        it('should not throw an error if topic already exist', done => {
+        it('should not throw an error if topic already exist', async done => {
             // GIVEN
             const sns = new SnsBuilder()
                 .withTopicName(topicName)
                 .createIfNotExists()
                 .build();
-            createTopicIfNotExist()
+            await createTopicIfNotExist();
+
+            try {
                 // WHEN
-                .then(() => sns.publishMessage({}))
-                .then(result => {
-                    // THEN
-                    expect(result).not.toBeNull();
-                    done();
-                })
-                .catch(exception => {
-                    fail(exception);
-                    done();
-                });
+                const result = await sns.publishMessage({});
+
+                // THEN
+                expect(result).not.toBeNull();
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
         });
     });
 });
 
-const deleteTopicIfExist = (): Promise<any> => {
+const listTopics = async (): Promise<any> => {
     const snsClient = new SNS({region: process.env.AWS_REGION});
-    return snsClient.listTopics({}).promise()
-        .then(results => results.Topics)
-        .then(topics => {
-            if (topics.some(topic => topic.TopicArn.indexOf(topicName) !== -1)) {
-                return snsClient.deleteTopic({
-                    TopicArn: topics.find(topic => topic.TopicArn.indexOf(topicName) !== -1).TopicArn
-                }).promise();
-            } else {
-                return Promise.resolve({});
-            }
-        });
+    const {Topics} = await snsClient.listTopics({}).promise();
+    return Topics;
 };
 
-const listTopics = (): Promise<any> => {
+const createTopicIfNotExist = async (): Promise<any> => {
     const snsClient = new SNS({region: process.env.AWS_REGION});
-    return snsClient.listTopics({}).promise()
-        .then(results => results.Topics);
-};
-
-const createTopicIfNotExist = (): Promise<any> => {
-    const snsClient = new SNS({region: process.env.AWS_REGION});
-    return snsClient.listTopics({}).promise()
-        .then(results => results.Topics)
-        .then(topics => {
-            if (topics.some(topic => topic.TopicArn.indexOf(topicName) !== -1)) {
-                return Promise.resolve({});
-            } else {
-                return snsClient.createTopic({
-                    Name: topicName
-                }).promise();
-            }
-        });
+    const {Topics} = await snsClient.listTopics({}).promise();
+    if (Topics.some(topic => topic.TopicArn.indexOf(topicName) !== -1)) {
+        return Promise.resolve({});
+    } else {
+        return snsClient.createTopic({
+            Name: topicName
+        }).promise();
+    }
 };
