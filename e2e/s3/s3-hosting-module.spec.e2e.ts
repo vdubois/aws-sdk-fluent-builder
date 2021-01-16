@@ -75,7 +75,7 @@ describe('S3 Hosting module', () => {
                 expect(value).not.toBeNull();
                 const files = await listFiles(bucketName);
                 expect(files).not.toBeNull();
-                expect(files).toContain('index.html');
+                expect(files).toContain('/index.html');
                 done();
             } catch (exception) {
                 fail(exception);
@@ -95,7 +95,7 @@ describe('S3 Hosting module', () => {
             await deleteBucketIfExists(bucketName);
             // WHEN
             await s3HostingService.uploadFilesFromDirectory(`${__dirname}/../data/hosting`);
-            const websiteHtmlContent = await needle('get', 'http://' + bucketName + '.s3-website-' + process.env.AWS_REGION + '.amazonaws.com/index.html');
+            const websiteHtmlContent = await needle('get', 'http://' + bucketName + '.s3-website-' + process.env.AWS_REGION + '.amazonaws.com//index.html');
             // THEN
             expect(websiteHtmlContent.body).toContain('S3 Hosting E2E Test');
             done();

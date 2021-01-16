@@ -19,7 +19,7 @@ describe('S3HostingService', () => {
                 done();
             } catch (exception) {
                 // THEN
-                expect(exception.message).toEqual('uploadFilesFromDirectory function : directory does not exist');
+                expect(exception.message).toEqual('uploadFilesFromDirectory function : source directory does not exist');
                 done();
             }
         });
@@ -133,17 +133,17 @@ describe('S3HostingService', () => {
                 expect(mockedS3.upload).toHaveBeenCalledTimes(3);
                 expect(mockedS3.upload).toHaveBeenCalledWith({
                     Bucket: 'toto',
-                    Key: 'subdirectory/test3.txt',
+                    Key: '/subdirectory/test3.txt',
                     Body: Buffer.from('data')
                 });
                 expect(mockedS3.upload).toHaveBeenCalledWith({
                     Bucket: 'toto',
-                    Key: 'test.txt',
+                    Key: '/test.txt',
                     Body: Buffer.from('data')
                 });
                 expect(mockedS3.upload).toHaveBeenCalledWith({
                     Bucket: 'toto',
-                    Key: 'test2.txt',
+                    Key: '/test2.txt',
                     Body: Buffer.from('data')
                 });
                 done();
@@ -175,17 +175,17 @@ describe('S3HostingService', () => {
                 expect(mockedS3.upload).toHaveBeenCalledTimes(3);
                 expect(mockedS3.upload).toHaveBeenCalledWith({
                     Bucket: 'toto',
-                    Key: 'mySubdir1/mySubdir2/subdirectory/test3.txt',
+                    Key: 'mySubdir1/mySubdir2//subdirectory/test3.txt',
                     Body: Buffer.from('data')
                 });
                 expect(mockedS3.upload).toHaveBeenCalledWith({
                     Bucket: 'toto',
-                    Key: 'mySubdir1/mySubdir2/test.txt',
+                    Key: 'mySubdir1/mySubdir2//test.txt',
                     Body: Buffer.from('data')
                 });
                 expect(mockedS3.upload).toHaveBeenCalledWith({
                     Bucket: 'toto',
-                    Key: 'mySubdir1/mySubdir2/test2.txt',
+                    Key: 'mySubdir1/mySubdir2//test2.txt',
                     Body: Buffer.from('data')
                 });
                 done();

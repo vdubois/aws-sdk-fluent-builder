@@ -10,7 +10,7 @@ export class S3HostingService {
 
     async uploadFilesFromDirectory(sourceDirectoryPath: string, destinationPathInBucket = ''): Promise<void> {
         if (!fs.existsSync(sourceDirectoryPath)) {
-            throw Error('uploadFilesFromDirectory function : directory does not exist');
+            throw Error('uploadFilesFromDirectory function : source directory does not exist');
         }
         if (!fs.statSync(sourceDirectoryPath).isDirectory()) {
             throw Error('uploadFilesFromDirectory function : ' + sourceDirectoryPath + ' is not a directory');
@@ -21,15 +21,18 @@ export class S3HostingService {
         if (destinationPathInBucket !== '' && !destinationPathInBucket.endsWith('/')) {
             throw Error(`uploadFilesFromDirectory function : destination path should end with a '/'`);
         }
-        const files = [].concat.apply([], this.walkDirectorySync(sourceDirectoryPath));
+        // @ts-ignore
+        const files = this.walkDirectorySync(sourceDirectoryPath).flat(100);
         await this.createBucketIfNecesary();
         await this.exposeBucketAsPublicWebsite();
+        let uploadIndex = 1;
         for (const file of files) {
             await this.s3Client.upload({
                 Bucket: this.bucketName,
-                Key: destinationPathInBucket + file.substring(path.normalize(sourceDirectoryPath).length + 1),
+                Key: destinationPathInBucket + file.substring(path.normalize(sourceDirectoryPath).length),
                 Body: fs.readFileSync(file)
             }).promise();
+            console.log(`[uploadFilesFromDirectory] (${uploadIndex++}/${files.length}) uploaded ${file}`);
         }
     }
 
