@@ -65,6 +65,7 @@
     "jasmine": "3.6.3",
     "jasmine-reporters": "2.3.2",
     "jasmine-spec-reporter": "6.0.0",
+    "needle": "2.6.0",
     "nyc": "15.1.0",
     "ts-loader": "8.0.14",
     "ts-node": "9.1.1",
@@ -73,7 +74,6 @@
     "webpack": "5.13.0"
   },
   "dependencies": {
-    "aws-sdk": "2.825.0",
-    "needle": "2.6.0"
+    "aws-sdk": "2.828.0"
   }
 }
