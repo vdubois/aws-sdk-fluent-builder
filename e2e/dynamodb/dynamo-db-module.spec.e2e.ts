@@ -225,6 +225,29 @@ describe('DynamoDB module', () => {
         });
     });
 
+    describe('saveAll function', () => {
+
+        it('should save objects in database', async done => {
+            try {
+                // GIVEN
+                await createTableIfNotExist();
+                await emptyTable();
+                await dynamoDbRepository.saveAll([{id: 'test', value: 'myValue'}, {id: 'test2', value: 'myValue2'}], 10);
+
+                // WHEN
+                const results = await listAll();
+
+                // THEN
+                expect(results).not.toBeNull();
+                expect(results.length).toEqual(2);
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
+        });
+    });
+
     describe('deleteById function', () => {
 
         it('should delete an object with its id', async done => {

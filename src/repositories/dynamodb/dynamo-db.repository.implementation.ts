@@ -63,6 +63,31 @@ export class DynamoDbRepositoryImplementation implements DynamoDbRepository {
     return this.dynamoDbClient.put(putParams).promise();
   }
 
+  saveAll(entities: Array<object>, byChunkOf: number = 25): Promise<any> {
+    const chunks = function(array, size) {
+      if (!array.length) {
+        return [];
+      }
+      const head = array.slice(0, size);
+      const tail = array.slice(size);
+
+      return [head, ...chunks(tail, size)];
+    };
+    const putParams = {
+      RequestItems: {
+      }
+    };
+    const chunkedEntities = chunks(entities, byChunkOf);
+    chunkedEntities.forEach((entitiesToSave: Array<object>) => {
+      putParams.RequestItems[this.tableName] = entitiesToSave.map(entity => ({
+          PutRequest: {
+            Item: entity
+          }
+        }));
+    });
+    return this.dynamoDbClient.batchWrite(putParams).promise();
+  }
+
   deleteById(id: string): Promise<any> {
     const deleteParams: any = {
       TableName: this.tableName

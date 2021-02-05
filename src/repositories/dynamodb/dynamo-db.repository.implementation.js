@@ -63,6 +63,28 @@ class DynamoDbRepositoryImplementation {
         };
         return this.dynamoDbClient.put(putParams).promise();
     }
+    saveAll(entities, byChunkOf = 25) {
+        const chunks = function (array, size) {
+            if (!array.length) {
+                return [];
+            }
+            const head = array.slice(0, size);
+            const tail = array.slice(size);
+            return [head, ...chunks(tail, size)];
+        };
+        const putParams = {
+            RequestItems: {}
+        };
+        const chunkedEntities = chunks(entities, byChunkOf);
+        chunkedEntities.forEach((entitiesToSave) => {
+            putParams.RequestItems[this.tableName] = entitiesToSave.map(entity => ({
+                PutRequest: {
+                    Item: entity
+                }
+            }));
+        });
+        return this.dynamoDbClient.batchWrite(putParams).promise();
+    }
     deleteById(id) {
         const deleteParams = {
             TableName: this.tableName

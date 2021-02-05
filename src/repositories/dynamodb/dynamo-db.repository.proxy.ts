@@ -54,6 +54,11 @@ export class DynamoDbRepositoryProxy implements DynamoDbRepository {
         return this.dynamoDbRepository.save(entity);
     }
 
+    async saveAll(entities: Array<object>, byChunkOf: number = 25): Promise<any> {
+        await this.createIfNotExists();
+        return this.dynamoDbRepository.saveAll(entities, byChunkOf);
+    }
+
     async deleteById(id: string): Promise<any> {
         await this.createIfNotExists();
         return this.dynamoDbRepository.deleteById(id);

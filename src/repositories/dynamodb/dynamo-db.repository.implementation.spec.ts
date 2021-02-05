@@ -116,6 +116,45 @@ describe('DynamoDbRepositoryImplementation', () => {
         });
     });
 
+    describe('saveAll function', () => {
+
+        it('should call batchWrite function from aws sdk', async (done) => {
+            // GIVEN
+            const caracteristics: DynamoDbTableCaracteristicsModel = {
+                tableName: 'toto'
+            };
+            const mockedDocumentClient = jasmine.createSpyObj('DocumentClient', ['batchWrite']);
+            mockedDocumentClient.batchWrite.and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
+
+            try {
+                // WHEN
+                const result = await dynamoDbRepositoryImplementation.saveAll([{myField: 'myValue'}]);
+                // THEN
+                expect(result).not.toBeNull();
+                expect(mockedDocumentClient.batchWrite).toHaveBeenCalledWith({
+                    RequestItems: {
+                        'toto': [
+                            {
+                                PutRequest: {
+                                    Item: {
+                                        myField: 'myValue'
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                });
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
+        });
+    });
+
     describe('deleteById function', () => {
 
         it('should call delete function from aws sdk', async (done) => {

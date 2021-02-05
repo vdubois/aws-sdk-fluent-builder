@@ -193,6 +193,51 @@ describe('DynamoDbRepositoryProxy', () => {
         });
     });
 
+    describe('saveAll function', () => {
+
+        it('should call batchWrite function from aws sdk after calling creation', async (done) => {
+            // GIVEN
+            const caracteristics: DynamoDbTableCaracteristicsModel = {
+                tableName: 'toto'
+            };
+            const mockedDynamoDb = jasmine.createSpyObj('DynamoDB', ['createTable', 'batchWrite']);
+            mockedDynamoDb.createTable.and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            const mockedDocumentClient = jasmine.createSpyObj('DocumentClient', ['batchWrite']);
+            mockedDocumentClient.batchWrite.and.returnValue({
+                promise: () => Promise.resolve({})
+            });
+            const dynamoDbRepositoryImplementation = new DynamoDbRepositoryImplementation(caracteristics, mockedDocumentClient);
+            const dynamoDbRepositoryProxy = new DynamoDbRepositoryProxy(dynamoDbRepositoryImplementation, mockedDynamoDb);
+            spyOn(dynamoDbRepositoryProxy, 'createIfNotExists').and.returnValue(Promise.resolve());
+
+            try {
+                // WHEN
+                const result = await dynamoDbRepositoryProxy.saveAll([{myField: 'myValue'}]);
+                expect(result).not.toBeNull();
+                expect(dynamoDbRepositoryProxy.createIfNotExists).toHaveBeenCalled();
+                expect(mockedDocumentClient.batchWrite).toHaveBeenCalledWith({
+                    RequestItems: {
+                        'toto': [
+                            {
+                                PutRequest: {
+                                    Item: {
+                                        myField: 'myValue'
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                });
+                done();
+            } catch (exception) {
+                fail(exception);
+                done();
+            }
+        });
+    });
+
     describe('deleteById function', () => {
 
         it('should call delete function from aws sdk after calling creation', async (done) => {
