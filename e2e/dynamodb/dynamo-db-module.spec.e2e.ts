@@ -232,7 +232,7 @@ describe('DynamoDB module', () => {
                 // GIVEN
                 await createTableIfNotExist();
                 await emptyTable();
-                await dynamoDbRepository.saveAll([{id: 'test', value: 'myValue'}, {id: 'test2', value: 'myValue2'}], 10);
+                await dynamoDbRepository.saveAll([{id: 'test', value: 'myValue'}, {id: 'test2', value: 'myValue2'}], 1);
 
                 // WHEN
                 const results = await listAll();

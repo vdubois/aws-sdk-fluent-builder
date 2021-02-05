@@ -28,7 +28,7 @@ export interface DynamoDbRepository {
      * @param entities entities to save
      * @param byChunkOf number of elements to save at a time
      */
-    saveAll(entities: Array<object>, byChunkOf?: number): Promise<any>;
+    saveAll(entities: Array<object>, byChunkOf?: number): Promise<void>;
     /**
      * Deletes an item from a table using its id
      * @param {string} id

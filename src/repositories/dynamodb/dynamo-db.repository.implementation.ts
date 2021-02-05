@@ -63,7 +63,7 @@ export class DynamoDbRepositoryImplementation implements DynamoDbRepository {
     return this.dynamoDbClient.put(putParams).promise();
   }
 
-  saveAll(entities: Array<object>, byChunkOf: number = 25): Promise<any> {
+  async saveAll(entities: Array<object>, byChunkOf: number = 25): Promise<void> {
     const chunks = function(array, size) {
       if (!array.length) {
         return [];
@@ -73,19 +73,19 @@ export class DynamoDbRepositoryImplementation implements DynamoDbRepository {
 
       return [head, ...chunks(tail, size)];
     };
-    const putParams = {
-      RequestItems: {
-      }
-    };
     const chunkedEntities = chunks(entities, byChunkOf);
-    chunkedEntities.forEach((entitiesToSave: Array<object>) => {
+    for (const entitiesToSave of chunkedEntities) {
+      const putParams = {
+        RequestItems: {
+        }
+      };
       putParams.RequestItems[this.tableName] = entitiesToSave.map(entity => ({
           PutRequest: {
             Item: entity
           }
         }));
-    });
-    return this.dynamoDbClient.batchWrite(putParams).promise();
+      await this.dynamoDbClient.batchWrite(putParams).promise();
+    }
   }
 
   deleteById(id: string): Promise<any> {

@@ -70,7 +70,7 @@ class DynamoDbRepositoryProxy {
     saveAll(entities, byChunkOf = 25) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.createIfNotExists();
-            return this.dynamoDbRepository.saveAll(entities, byChunkOf);
+            yield this.dynamoDbRepository.saveAll(entities, byChunkOf);
         });
     }
     deleteById(id) {

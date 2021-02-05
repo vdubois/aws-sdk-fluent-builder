@@ -10,7 +10,7 @@ export declare class DynamoDbRepositoryProxy implements DynamoDbRepository {
     findById(id: string): Promise<any>;
     findBy(field: string, value: string): Promise<Array<any>>;
     save(entity: object): Promise<any>;
-    saveAll(entities: Array<object>, byChunkOf?: number): Promise<any>;
+    saveAll(entities: Array<object>, byChunkOf?: number): Promise<void>;
     deleteById(id: string): Promise<any>;
     deleteAll(): Promise<any>;
 }

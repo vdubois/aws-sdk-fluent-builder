@@ -131,7 +131,7 @@ describe('DynamoDbRepositoryImplementation', () => {
 
             try {
                 // WHEN
-                const result = await dynamoDbRepositoryImplementation.saveAll([{myField: 'myValue'}]);
+                const result = await dynamoDbRepositoryImplementation.saveAll([{myField: 'myValue'}, {myField: 'myValue2'}], 1);
                 // THEN
                 expect(result).not.toBeNull();
                 expect(mockedDocumentClient.batchWrite).toHaveBeenCalledWith({
@@ -141,6 +141,19 @@ describe('DynamoDbRepositoryImplementation', () => {
                                 PutRequest: {
                                     Item: {
                                         myField: 'myValue'
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                });
+                expect(mockedDocumentClient.batchWrite).toHaveBeenCalledWith({
+                    RequestItems: {
+                        'toto': [
+                            {
+                                PutRequest: {
+                                    Item: {
+                                        myField: 'myValue2'
                                     }
                                 }
                             }

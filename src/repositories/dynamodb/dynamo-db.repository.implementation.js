@@ -64,26 +64,28 @@ class DynamoDbRepositoryImplementation {
         return this.dynamoDbClient.put(putParams).promise();
     }
     saveAll(entities, byChunkOf = 25) {
-        const chunks = function (array, size) {
-            if (!array.length) {
-                return [];
-            }
-            const head = array.slice(0, size);
-            const tail = array.slice(size);
-            return [head, ...chunks(tail, size)];
-        };
-        const putParams = {
-            RequestItems: {}
-        };
-        const chunkedEntities = chunks(entities, byChunkOf);
-        chunkedEntities.forEach((entitiesToSave) => {
-            putParams.RequestItems[this.tableName] = entitiesToSave.map(entity => ({
-                PutRequest: {
-                    Item: entity
+        return __awaiter(this, void 0, void 0, function* () {
+            const chunks = function (array, size) {
+                if (!array.length) {
+                    return [];
                 }
-            }));
+                const head = array.slice(0, size);
+                const tail = array.slice(size);
+                return [head, ...chunks(tail, size)];
+            };
+            const chunkedEntities = chunks(entities, byChunkOf);
+            for (const entitiesToSave of chunkedEntities) {
+                const putParams = {
+                    RequestItems: {}
+                };
+                putParams.RequestItems[this.tableName] = entitiesToSave.map(entity => ({
+                    PutRequest: {
+                        Item: entity
+                    }
+                }));
+                yield this.dynamoDbClient.batchWrite(putParams).promise();
+            }
         });
-        return this.dynamoDbClient.batchWrite(putParams).promise();
     }
     deleteById(id) {
         const deleteParams = {
