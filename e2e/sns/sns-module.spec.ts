@@ -2,20 +2,9 @@ import SNS = require('aws-sdk/clients/sns');
 import { SnsBuilder } from '../../src/builders/sns/sns.builder';
 import { deleteTopicIfExist } from '../clean-functions';
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
 const topicName = 'sns-topic-e2e';
 
 describe('SNS Module', () => {
-
-    let originalTimeout;
-
-    /**
-     * Sets timeout to 30s.
-     */
-    beforeEach(() => {
-        originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-        jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
-    });
 
     describe('createIfNotExists function', () => {
 

@@ -11,6 +11,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DynamoDbRepositoryImplementation = void 0;
 const dynamodb_1 = require("aws-sdk/clients/dynamodb");
+const dynamo_db_table_caracteristics_model_1 = require("../../models/dynamo-db-table-caracteristics.model");
+const uuid_1 = require("uuid");
 class DynamoDbRepositoryImplementation {
     constructor(caracteristics, dynamoDbClient = new dynamodb_1.DocumentClient({ region: process.env.AWS_REGION })) {
         this.caracteristics = caracteristics;
@@ -19,8 +21,11 @@ class DynamoDbRepositoryImplementation {
     get tableName() {
         return this.caracteristics.tableName;
     }
-    get keyName() {
-        return this.caracteristics.keyName;
+    get partitionKeyName() {
+        return this.caracteristics.partitionKeyName;
+    }
+    get sortKeyName() {
+        return this.caracteristics.sortKeyName;
     }
     get readCapacity() {
         return this.caracteristics.readCapacity;
@@ -28,39 +33,56 @@ class DynamoDbRepositoryImplementation {
     get writeCapacity() {
         return this.caracteristics.writeCapacity;
     }
-    findAll() {
-        const scanParams = {
-            TableName: this.tableName
-        };
-        return this.scan(scanParams);
+    get withGeneratedSortKey() {
+        return this.caracteristics.sortKeyName === dynamo_db_table_caracteristics_model_1.GENERATED_SORT_KEY;
     }
-    findById(id) {
+    findOneByPartitionKey(partitionKeyValue) {
         return __awaiter(this, void 0, void 0, function* () {
             const getParams = {
                 TableName: this.tableName,
             };
             getParams.Key = {};
-            getParams.Key[this.keyName] = id;
+            getParams.Key[this.partitionKeyName] = partitionKeyValue;
             const result = yield this.dynamoDbClient.get(getParams).promise();
             return result.Item;
         });
     }
-    findBy(field, value) {
-        const scanParams = {
-            TableName: this.tableName
-        };
-        scanParams.ScanFilter = {};
-        scanParams.ScanFilter[field] = {
-            ComparisonOperator: 'EQ',
-            AttributeValueList: [value]
-        };
-        return this.scan(scanParams);
+    findOneByPartitionKeyAndSortKey(partitionKeyValue, sortKeyValue) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const getParams = {
+                TableName: this.tableName,
+            };
+            getParams.Key = {};
+            getParams.Key[this.partitionKeyName] = partitionKeyValue;
+            getParams.Key[this.sortKeyName] = sortKeyValue;
+            const result = yield this.dynamoDbClient.get(getParams).promise();
+            return result.Item;
+        });
+    }
+    findAllByPartitionKey(partitionKeyValue) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let queryParams;
+            queryParams = {
+                TableName: this.tableName,
+                KeyConditionExpression: `${this.partitionKeyName} = :pk`,
+                ExpressionAttributeValues: {
+                    // @ts-ignore
+                    ':pk': partitionKeyValue
+                }
+            };
+            const results = yield this.dynamoDbClient.query(queryParams).promise();
+            return results.Items;
+        });
     }
     save(entity) {
+        // @ts-ignore
         const putParams = {
             TableName: this.tableName,
-            Item: entity
         };
+        putParams.Item = entity;
+        if (this.withGeneratedSortKey) {
+            putParams.Item[`${dynamo_db_table_caracteristics_model_1.GENERATED_SORT_KEY}`] = uuid_1.v4();
+        }
         return this.dynamoDbClient.put(putParams).promise();
     }
     saveAll(entities, byChunkOf = 25) {
@@ -78,48 +100,37 @@ class DynamoDbRepositoryImplementation {
                 const putParams = {
                     RequestItems: {}
                 };
-                putParams.RequestItems[this.tableName] = entitiesToSave.map(entity => ({
-                    PutRequest: {
-                        Item: entity
+                putParams.RequestItems[this.tableName] = entitiesToSave.map(entity => {
+                    const putRequest = {
+                        PutRequest: {
+                            Item: entity
+                        }
+                    };
+                    if (this.withGeneratedSortKey) {
+                        putRequest.PutRequest.Item[dynamo_db_table_caracteristics_model_1.GENERATED_SORT_KEY] = uuid_1.v4();
                     }
-                }));
+                    return putRequest;
+                });
                 yield this.dynamoDbClient.batchWrite(putParams).promise();
             }
         });
     }
-    deleteById(id) {
+    deleteByPartitionKey(partitionKeyValue) {
         const deleteParams = {
-            TableName: this.tableName
+            TableName: this.tableName,
         };
         deleteParams.Key = {};
-        deleteParams.Key[this.keyName] = id;
+        deleteParams.Key[this.partitionKeyName] = partitionKeyValue;
         return this.dynamoDbClient.delete(deleteParams).promise();
     }
-    deleteAll() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const items = yield this.findAll();
-            for (const item of items) {
-                yield this.deleteById(item[this.keyName]);
-            }
-        });
-    }
-    scan(scanParams, alreadyScannedItems) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const scannedItems = alreadyScannedItems || [];
-            scanParams.ConsistentRead = true;
-            const result = yield this.dynamoDbClient.scan(scanParams).promise();
-            scannedItems.push(result.Items);
-            if (result.LastEvaluatedKey) {
-                scanParams.ExclusiveStartKey = result.LastEvaluatedKey;
-                return this.scan(scanParams, scannedItems);
-            }
-            else {
-                return Promise.resolve(this.flattenArray(scannedItems));
-            }
-        });
-    }
-    flattenArray(arrayOfArray) {
-        return [].concat.apply([], arrayOfArray);
+    deleteByPartitionKeyAndSortKey(partitionKeyValue, sortKeyValue) {
+        const deleteParams = {
+            TableName: this.tableName,
+        };
+        deleteParams.Key = {};
+        deleteParams.Key[this.partitionKeyName] = partitionKeyValue;
+        deleteParams.Key[this.sortKeyName] = sortKeyValue;
+        return this.dynamoDbClient.delete(deleteParams).promise();
     }
 }
 exports.DynamoDbRepositoryImplementation = DynamoDbRepositoryImplementation;

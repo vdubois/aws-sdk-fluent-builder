@@ -1,5 +1,6 @@
 import { ListObjectsOutput } from 'aws-sdk/clients/s3';
 import { S3StorageService } from './s3-storage.service';
+import { S3 } from 'aws-sdk';
 
 describe('S3StorageService', () => {
 
@@ -7,10 +8,13 @@ describe('S3StorageService', () => {
 
         it('should get an empty list if aws sdk return no files', async (done) => {
             // GIVEN
-            const mockedS3 = jasmine.createSpyObj('S3', ['listObjects']);
-            mockedS3.listObjects.and.returnValue({
+            const listObjectsMock = jest.fn((params: S3.Types.ListObjectsRequest) => ({
                 promise: () => Promise.resolve({Contents: []})
-            });
+            }));
+            const mockedS3 = {
+                listObjects: listObjectsMock
+            };
+            // @ts-ignore
             const storageService = new S3StorageService('toto', false, mockedS3);
 
             // WHEN
@@ -29,10 +33,13 @@ describe('S3StorageService', () => {
 
         it('should get one file if aws sdk returns one file', async (done) => {
             // GIVEN
-            const mockedS3 = jasmine.createSpyObj('S3', ['listObjects']);
-            mockedS3.listObjects.and.returnValue({
+            const listObjectsMock = jest.fn((params: S3.Types.ListObjectsRequest) => ({
                 promise: () => Promise.resolve({Contents: [{Key: 'test.file'}]} as ListObjectsOutput)
-            });
+            }));
+            const mockedS3 = {
+                listObjects: listObjectsMock
+            };
+            // @ts-ignore
             const storageService = new S3StorageService('toto', false, mockedS3);
 
             // WHEN
@@ -51,10 +58,13 @@ describe('S3StorageService', () => {
 
         it('should get one file if aws sdk returns multiple files but we provide a predicate', async (done) => {
             // GIVEN
-            const mockedS3 = jasmine.createSpyObj('S3', ['listObjects']);
-            mockedS3.listObjects.and.returnValue({
+            const listObjectsMock = jest.fn((params: S3.Types.ListObjectsRequest) => ({
                 promise: () => Promise.resolve({Contents: [{Key: 'test.file'}, {Key: 'test2.txt'}]} as ListObjectsOutput)
-            });
+            }));
+            const mockedS3 = {
+                listObjects: listObjectsMock
+            };
+            // @ts-ignore
             const storageService = new S3StorageService('toto', false, mockedS3);
 
             // WHEN
@@ -73,10 +83,13 @@ describe('S3StorageService', () => {
 
         it('should throw an error if aws sdk throws an error', async (done) => {
             // GIVEN
-            const mockedS3 = jasmine.createSpyObj('S3', ['listObjects']);
-            mockedS3.listObjects.and.returnValue({
+            const listObjectsMock = jest.fn((params: S3.Types.ListObjectsRequest) => ({
                 promise: () => Promise.reject('Error when listing files')
-            });
+            }));
+            const mockedS3 = {
+                listObjects: listObjectsMock
+            };
+            // @ts-ignore
             const storageService = new S3StorageService('toto', false, mockedS3);
 
             // WHEN
@@ -97,10 +110,13 @@ describe('S3StorageService', () => {
 
         it('should load file contents when load file from aws sdk works fine', async(done) => {
             // GIVEN
-            const mockedS3 = jasmine.createSpyObj('S3', ['getObject']);
-            mockedS3.getObject.and.returnValue({
+            const getObjectMock = jest.fn((params: S3.Types.GetObjectRequest) => ({
                 promise: () => Promise.resolve({Body: 'content'})
-            });
+            }));
+            const mockedS3 = {
+                getObject: getObjectMock
+            };
+            // @ts-ignore
             const storageService = new S3StorageService('toto', false, mockedS3);
 
             try {
@@ -118,10 +134,13 @@ describe('S3StorageService', () => {
 
         it('should throw an error when load file from aws sdk thrown an error', async done => {
             // GIVEN
-            const mockedS3 = jasmine.createSpyObj('S3', ['getObject']);
-            mockedS3.getObject.and.returnValue({
+            const getObjectMock = jest.fn((params: S3.Types.GetObjectRequest) => ({
                 promise: () => Promise.reject('read error')
-            });
+            }));
+            const mockedS3 = {
+                getObject: getObjectMock
+            };
+            // @ts-ignore
             const storageService = new S3StorageService('toto', false, mockedS3);
 
             try {
@@ -142,10 +161,13 @@ describe('S3StorageService', () => {
 
         it('should write file contents when upload from aws sdk works fine', async done => {
             // GIVEN
-            const mockedS3 = jasmine.createSpyObj('S3', ['upload']);
-            mockedS3.upload.and.returnValue({
+            const uploadMock = jest.fn((params: S3.Types.UploadPartRequest) => ({
                 promise: () => Promise.resolve({})
-            });
+            }));
+            const mockedS3 = {
+                upload: uploadMock
+            };
+            // @ts-ignore
             const storageService = new S3StorageService('toto', false, mockedS3);
 
             try { // WHEN
@@ -161,10 +183,13 @@ describe('S3StorageService', () => {
 
         it('should throw an error if aws sdk throws an error', async done => {
             // GIVEN
-            const mockedS3 = jasmine.createSpyObj('S3', ['upload']);
-            mockedS3.upload.and.returnValue({
+            const uploadMock = jest.fn((params: S3.Types.UploadPartRequest) => ({
                 promise: () => Promise.reject('write error')
-            });
+            }));
+            const mockedS3 = {
+                upload: uploadMock
+            };
+            // @ts-ignore
             const storageService = new S3StorageService('toto', false, mockedS3);
 
             try { // WHEN
@@ -184,10 +209,13 @@ describe('S3StorageService', () => {
 
         it('should throw an error if aws sdk throws an error', async done => {
             // GIVEN
-            const mockedS3 = jasmine.createSpyObj('S3', ['deleteObject']);
-            mockedS3.deleteObject.and.returnValue({
+            const deleteObjectMock = jest.fn((params: S3.Types.DeleteObjectRequest) => ({
                 promise: () => Promise.reject('delete error')
-            });
+            }));
+            const mockedS3 = {
+                deleteObject: deleteObjectMock
+            };
+            // @ts-ignore
             const storageService = new S3StorageService('toto', false, mockedS3);
 
             try {
@@ -205,10 +233,13 @@ describe('S3StorageService', () => {
 
         it('should delete file with a call to aws sdk', async done => {
             // GIVEN
-            const mockedS3 = jasmine.createSpyObj('S3', ['deleteObject']);
-            mockedS3.deleteObject.and.returnValue({
+            const deleteObjectMock = jest.fn((params: S3.Types.DeleteObjectRequest) => ({
                 promise: () => Promise.resolve({})
-            });
+            }));
+            const mockedS3 = {
+                deleteObject: deleteObjectMock
+            };
+            // @ts-ignore
             const storageService = new S3StorageService('toto', false, mockedS3);
 
             try {
@@ -232,10 +263,13 @@ describe('S3StorageService', () => {
 
         it('should throw an error if aws sdk throws an error', async done => {
             // GIVEN
-            const mockedS3 = jasmine.createSpyObj('S3', ['copyObject']);
-            mockedS3.copyObject.and.returnValue({
+            const copyObjectMock = jest.fn((params: S3.Types.CopyObjectRequest) => ({
                 promise: () => Promise.reject('copy error')
-            });
+            }));
+            const mockedS3 = {
+                copyObject: copyObjectMock
+            };
+            // @ts-ignore
             const storageService = new S3StorageService('toto', false, mockedS3);
 
             try {
@@ -253,10 +287,13 @@ describe('S3StorageService', () => {
 
         it('should throw an error if source and destination have same paths', async done => {
             // GIVEN
-            const mockedS3 = jasmine.createSpyObj('S3', ['copyObject']);
-            mockedS3.copyObject.and.returnValue({
+            const copyObjectMock = jest.fn((params: S3.Types.CopyObjectRequest) => ({
                 promise: () => Promise.resolve({})
-            });
+            }));
+            const mockedS3 = {
+                copyObject: copyObjectMock
+            };
+            // @ts-ignore
             const storageService = new S3StorageService('toto', false, mockedS3);
 
             try {
@@ -274,10 +311,13 @@ describe('S3StorageService', () => {
 
         it('should copy file with a call to aws sdk', async done => {
             // GIVEN
-            const mockedS3 = jasmine.createSpyObj('S3', ['copyObject']);
-            mockedS3.copyObject.and.returnValue({
+            const copyObjectMock = jest.fn((params: S3.Types.CopyObjectRequest) => ({
                 promise: () => Promise.resolve({})
-            });
+            }));
+            const mockedS3 = {
+                copyObject: copyObjectMock
+            };
+            // @ts-ignore
             const storageService = new S3StorageService('toto', false, mockedS3);
 
             try {

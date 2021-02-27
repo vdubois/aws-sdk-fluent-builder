@@ -17,11 +17,13 @@ It's an API based on the use of promises.
 ```js
 const dynamoDbRepository = new DynamoDbBuilder()
   .withTableName('foo')
+  .withPartitionKeyName('id')  
+  .withSortKeyName('date')  
   .createIfNotExists()
   .build();
 
-const results = await dynamoDbRepository.findAll();
-console.log(results);
+const result = await dynamoDbRepository.findOnePartitionKeyAndSortKey('6325', '2020-01-01');
+console.log(result);
 ```
 
 ### SNS

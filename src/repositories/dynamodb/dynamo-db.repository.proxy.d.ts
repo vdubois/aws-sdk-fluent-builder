@@ -6,11 +6,13 @@ export declare class DynamoDbRepositoryProxy implements DynamoDbRepository {
     private dynamoDbClient;
     constructor(dynamoDbRepository: DynamoDbRepositoryImplementation, dynamoDbClient?: DynamoDB);
     createIfNotExists(): Promise<any>;
-    findAll(): Promise<Array<any>>;
-    findById(id: string): Promise<any>;
-    findBy(field: string, value: string): Promise<Array<any>>;
+    private attributeDefinitions;
+    private keySchema;
+    findOneByPartitionKey(id: string): Promise<any>;
+    findOneByPartitionKeyAndSortKey(partitionKeyValue: string, sortKeyValue: string): Promise<any>;
+    findAllByPartitionKey(partitionKeyValue: string): Promise<Array<any>>;
     save(entity: object): Promise<any>;
     saveAll(entities: Array<object>, byChunkOf?: number): Promise<void>;
-    deleteById(id: string): Promise<any>;
-    deleteAll(): Promise<any>;
+    deleteByPartitionKey(partitionKeyValue: string): Promise<any>;
+    deleteByPartitionKeyAndSortKey(partitionKeyValue: string, sortKeyValue: string): Promise<any>;
 }

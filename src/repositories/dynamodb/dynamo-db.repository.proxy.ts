@@ -1,7 +1,7 @@
-import {DynamoDbRepository} from './dynamo-db.repository';
-import { CreateTableInput } from 'aws-sdk/clients/dynamodb';
-import {DynamoDbRepositoryImplementation} from './dynamo-db.repository.implementation';
+import { DynamoDbRepository } from './dynamo-db.repository';
 import * as DynamoDB from 'aws-sdk/clients/dynamodb';
+import { CreateTableInput } from 'aws-sdk/clients/dynamodb';
+import { DynamoDbRepositoryImplementation } from './dynamo-db.repository.implementation';
 
 export class DynamoDbRepositoryProxy implements DynamoDbRepository {
 
@@ -12,14 +12,8 @@ export class DynamoDbRepositoryProxy implements DynamoDbRepository {
     async createIfNotExists(): Promise<any> {
         const createTableParams: CreateTableInput = {
             TableName: this.dynamoDbRepository.tableName,
-            AttributeDefinitions: [{
-                AttributeName: this.dynamoDbRepository.keyName,
-                AttributeType: 'S'
-            }],
-            KeySchema: [{
-                AttributeName: this.dynamoDbRepository.keyName,
-                KeyType: 'HASH'
-            }],
+            AttributeDefinitions: this.attributeDefinitions(),
+            KeySchema: this.keySchema(),
             ProvisionedThroughput: {
                 ReadCapacityUnits: this.dynamoDbRepository.readCapacity,
                 WriteCapacityUnits: this.dynamoDbRepository.writeCapacity
@@ -34,19 +28,47 @@ export class DynamoDbRepositoryProxy implements DynamoDbRepository {
         }
     }
 
-    async findAll(): Promise<Array<any>> {
-        await this.createIfNotExists();
-        return this.dynamoDbRepository.findAll();
+    private attributeDefinitions() {
+        const attributeDefinitions = [{
+            AttributeName: this.dynamoDbRepository.partitionKeyName,
+            AttributeType: 'S'
+        }];
+        if (this.dynamoDbRepository.sortKeyName) {
+            attributeDefinitions.push({
+                AttributeName: this.dynamoDbRepository.sortKeyName,
+                AttributeType: 'S'
+            });
+        }
+        return attributeDefinitions;
     }
 
-    async findById(id: string): Promise<any> {
-        await this.createIfNotExists();
-        return this.dynamoDbRepository.findById(id);
+    private keySchema() {
+        const keySchema = [{
+            AttributeName: this.dynamoDbRepository.partitionKeyName,
+            KeyType: 'HASH'
+        }];
+        if (this.dynamoDbRepository.sortKeyName) {
+            keySchema.push({
+                AttributeName: this.dynamoDbRepository.sortKeyName,
+                KeyType: 'RANGE'
+            });
+        }
+        return keySchema;
     }
 
-    async findBy(field: string, value: string): Promise<Array<any>> {
+    async findOneByPartitionKey(id: string): Promise<any> {
         await this.createIfNotExists();
-        return this.dynamoDbRepository.findBy(field, value);
+        return this.dynamoDbRepository.findOneByPartitionKey(id);
+    }
+
+    async findOneByPartitionKeyAndSortKey(partitionKeyValue: string, sortKeyValue: string): Promise<any> {
+        await this.createIfNotExists();
+        return this.dynamoDbRepository.findOneByPartitionKeyAndSortKey(partitionKeyValue, sortKeyValue);
+    }
+
+    async findAllByPartitionKey(partitionKeyValue: string): Promise<Array<any>> {
+        await this.createIfNotExists();
+        return this.dynamoDbRepository.findAllByPartitionKey(partitionKeyValue);
     }
 
     async save(entity: object): Promise<any> {
@@ -59,13 +81,13 @@ export class DynamoDbRepositoryProxy implements DynamoDbRepository {
         await this.dynamoDbRepository.saveAll(entities, byChunkOf);
     }
 
-    async deleteById(id: string): Promise<any> {
+    async deleteByPartitionKey(partitionKeyValue: string): Promise<any> {
         await this.createIfNotExists();
-        return this.dynamoDbRepository.deleteById(id);
+        return this.dynamoDbRepository.deleteByPartitionKey(partitionKeyValue);
     }
 
-    async deleteAll(): Promise<any> {
+    async deleteByPartitionKeyAndSortKey(partitionKeyValue: string, sortKeyValue: string): Promise<any> {
         await this.createIfNotExists();
-        return this.dynamoDbRepository.deleteAll();
+        return this.dynamoDbRepository.deleteByPartitionKeyAndSortKey(partitionKeyValue, sortKeyValue);
     }
 }

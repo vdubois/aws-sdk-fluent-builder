@@ -1,4 +1,5 @@
-import {DynamoDbBuilder} from './dynamo-db.builder';
+import { DynamoDbBuilder } from './dynamo-db.builder';
+import { GENERATED_SORT_KEY } from '../../models/dynamo-db-table-caracteristics.model';
 
 describe('DynamoDBBuilder', () => {
 
@@ -63,7 +64,7 @@ describe('DynamoDBBuilder', () => {
 
             // THEN
             expect(dynamoDbRepository).not.toBeNull();
-            expect(dynamoDbRepository['keyName']).toEqual('id');
+            expect(dynamoDbRepository['partitionKeyName']).toEqual('id');
             expect(dynamoDbRepository['readCapacity']).toEqual(1);
             expect(dynamoDbRepository['writeCapacity']).toEqual(1);
             done();
@@ -105,19 +106,53 @@ describe('DynamoDBBuilder', () => {
         });
     });
 
-    describe('withKeyName function', () => {
-        it('should store key name when called', done => {
+    describe('withPartitionKeyName function', () => {
+        it('should store partition key name when called', done => {
             // GIVEN
 
             // WHEN
             const dynamoDbRepository = new DynamoDbBuilder()
                 .withTableName('toto')
-                .withKeyName('myKey')
+                .withPartitionKeyName('myKey')
                 .build();
 
             // THEN
-            expect(dynamoDbRepository['keyName']).not.toBeNull();
-            expect(dynamoDbRepository['keyName']).toEqual('myKey');
+            expect(dynamoDbRepository['partitionKeyName']).not.toBeNull();
+            expect(dynamoDbRepository['partitionKeyName']).toEqual('myKey');
+            done();
+        });
+    });
+
+    describe('withSortKeyName function', () => {
+        it('should store sort key name when called', done => {
+            // GIVEN
+
+            // WHEN
+            const dynamoDbRepository = new DynamoDbBuilder()
+                .withTableName('toto')
+                .withSortKeyName('sortKey')
+                .build();
+
+            // THEN
+            expect(dynamoDbRepository['sortKeyName']).not.toBeNull();
+            expect(dynamoDbRepository['sortKeyName']).toEqual('sortKey');
+            done();
+        });
+    });
+
+    describe('withGeneratedSortKey function', () => {
+        it('should store sort key name when called', done => {
+            // GIVEN
+
+            // WHEN
+            const dynamoDbRepository = new DynamoDbBuilder()
+                .withTableName('toto')
+                .withGeneratedSortKey()
+                .build();
+
+            // THEN
+            expect(dynamoDbRepository['sortKeyName']).not.toBeNull();
+            expect(dynamoDbRepository['sortKeyName']).toEqual(GENERATED_SORT_KEY);
             done();
         });
     });

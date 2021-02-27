@@ -1,9 +1,7 @@
 import { S3Builder } from '../../src/builders/s3/s3.builder';
-import S3 = require('aws-sdk/clients/s3');
 import { deleteBucketIfExists } from '../clean-functions';
-import { createBucketIfNotExists, emptyBucket, listBuckets } from './s3-configuration-module.spec.e2e';
-
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
+import { createBucketIfNotExists, emptyBucket, listBuckets } from './s3-configuration-module.spec';
+import S3 = require('aws-sdk/clients/s3');
 
 const bucketName = 's3-storage-module-e2e';
 const storageService = new S3Builder()
@@ -13,16 +11,6 @@ const storageService = new S3Builder()
     .build();
 
 describe('S3 Storage module', () => {
-
-    let originalTimeout;
-
-    /**
-     * Sets timeout to 30s.
-     */
-    beforeEach(() => {
-        originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-        jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
-    });
 
     describe('createIfNotExists function', () => {
 

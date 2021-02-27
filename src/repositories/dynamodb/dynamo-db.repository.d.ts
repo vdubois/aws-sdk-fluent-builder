@@ -1,22 +1,23 @@
 export interface DynamoDbRepository {
     /**
-     * Returns all items of a table
-     * @returns {Promise<Array<any>>}
-     */
-    findAll(): Promise<Array<any>>;
-    /**
-     * Returns an item of a table using its id
-     * @param {string} id
+     * Returns an item of a table using its partitionKeyValue
+     * @param {string} partitionKeyValue
      * @returns {Promise<any>}
      */
-    findById(id: string): Promise<any>;
+    findOneByPartitionKey(partitionKeyValue: string): Promise<any>;
     /**
-     * Returns some items filtered by field/value
-     * @param {string} field
-     * @param {string} value
+     * Returns an item of a table using its partitionKeyValue and sortKeyValue
+     * @param {string} partitionKeyValue
+     * @param {string} sortKeyValue
+     * @returns {Promise<any>}
+     */
+    findOneByPartitionKeyAndSortKey(partitionKeyValue: string, sortKeyValue: string): Promise<any>;
+    /**
+     * Returns all items matching a partition key
+     * @param partitionKeyValue the partition key to query table
      * @returns {Promise<Array<any>>}
      */
-    findBy(field: string, value: string): Promise<Array<any>>;
+    findAllByPartitionKey(partitionKeyValue: string): Promise<Array<any>>;
     /**
      * Saves an item into a table
      * @param {object} entity
@@ -30,14 +31,16 @@ export interface DynamoDbRepository {
      */
     saveAll(entities: Array<object>, byChunkOf?: number): Promise<void>;
     /**
-     * Deletes an item from a table using its id
-     * @param {string} id
+     * Deletes an item from a table using its partitionKeyValue
+     * @param {string} partitionKeyValue
      * @returns {Promise<any>}
      */
-    deleteById(id: string): Promise<any>;
+    deleteByPartitionKey(partitionKeyValue: string): Promise<any>;
     /**
-     * Deletes all items from a table
+     * Deletes an item from a table using its partitionKeyValue and sortKeyValue
+     * @param {string} partitionKeyValue
+     * @param {string} sortKeyValue
      * @returns {Promise<any>}
      */
-    deleteAll(): Promise<any>;
+    deleteByPartitionKeyAndSortKey(partitionKeyValue: string, sortKeyValue: string): Promise<any>;
 }

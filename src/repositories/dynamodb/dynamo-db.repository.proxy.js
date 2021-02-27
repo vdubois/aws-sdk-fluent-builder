@@ -20,14 +20,8 @@ class DynamoDbRepositoryProxy {
         return __awaiter(this, void 0, void 0, function* () {
             const createTableParams = {
                 TableName: this.dynamoDbRepository.tableName,
-                AttributeDefinitions: [{
-                        AttributeName: this.dynamoDbRepository.keyName,
-                        AttributeType: 'S'
-                    }],
-                KeySchema: [{
-                        AttributeName: this.dynamoDbRepository.keyName,
-                        KeyType: 'HASH'
-                    }],
+                AttributeDefinitions: this.attributeDefinitions(),
+                KeySchema: this.keySchema(),
                 ProvisionedThroughput: {
                     ReadCapacityUnits: this.dynamoDbRepository.readCapacity,
                     WriteCapacityUnits: this.dynamoDbRepository.writeCapacity
@@ -43,22 +37,48 @@ class DynamoDbRepositoryProxy {
             }
         });
     }
-    findAll() {
+    attributeDefinitions() {
+        const attributeDefinitions = [{
+                AttributeName: this.dynamoDbRepository.partitionKeyName,
+                AttributeType: 'S'
+            }];
+        if (this.dynamoDbRepository.sortKeyName) {
+            attributeDefinitions.push({
+                AttributeName: this.dynamoDbRepository.sortKeyName,
+                AttributeType: 'S'
+            });
+        }
+        return attributeDefinitions;
+    }
+    keySchema() {
+        const keySchema = [{
+                AttributeName: this.dynamoDbRepository.partitionKeyName,
+                KeyType: 'HASH'
+            }];
+        if (this.dynamoDbRepository.sortKeyName) {
+            keySchema.push({
+                AttributeName: this.dynamoDbRepository.sortKeyName,
+                KeyType: 'RANGE'
+            });
+        }
+        return keySchema;
+    }
+    findOneByPartitionKey(id) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.createIfNotExists();
-            return this.dynamoDbRepository.findAll();
+            return this.dynamoDbRepository.findOneByPartitionKey(id);
         });
     }
-    findById(id) {
+    findOneByPartitionKeyAndSortKey(partitionKeyValue, sortKeyValue) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.createIfNotExists();
-            return this.dynamoDbRepository.findById(id);
+            return this.dynamoDbRepository.findOneByPartitionKeyAndSortKey(partitionKeyValue, sortKeyValue);
         });
     }
-    findBy(field, value) {
+    findAllByPartitionKey(partitionKeyValue) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.createIfNotExists();
-            return this.dynamoDbRepository.findBy(field, value);
+            return this.dynamoDbRepository.findAllByPartitionKey(partitionKeyValue);
         });
     }
     save(entity) {
@@ -73,16 +93,16 @@ class DynamoDbRepositoryProxy {
             yield this.dynamoDbRepository.saveAll(entities, byChunkOf);
         });
     }
-    deleteById(id) {
+    deleteByPartitionKey(partitionKeyValue) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.createIfNotExists();
-            return this.dynamoDbRepository.deleteById(id);
+            return this.dynamoDbRepository.deleteByPartitionKey(partitionKeyValue);
         });
     }
-    deleteAll() {
+    deleteByPartitionKeyAndSortKey(partitionKeyValue, sortKeyValue) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.createIfNotExists();
-            return this.dynamoDbRepository.deleteAll();
+            return this.dynamoDbRepository.deleteByPartitionKeyAndSortKey(partitionKeyValue, sortKeyValue);
         });
     }
 }

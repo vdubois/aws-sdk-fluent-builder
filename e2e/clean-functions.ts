@@ -1,11 +1,10 @@
-import { DeleteTableInput } from 'aws-sdk/clients/dynamodb';
 import * as DynamoDB from 'aws-sdk/clients/dynamodb';
+import { DeleteTableInput } from 'aws-sdk/clients/dynamodb';
 import * as SNS from 'aws-sdk/clients/sns';
 import * as S3 from 'aws-sdk/clients/s3';
 
-export const deleteTableIfExist = async (): Promise<any> => {
+export const deleteTableIfExist = async (tableName: string): Promise<any> => {
     const dynamoDbClient = new DynamoDB({region: process.env.AWS_REGION});
-    const tableName = 'dynamo-db-module-e2e';
     const {TableNames} = await dynamoDbClient.listTables({}).promise();
     if (TableNames.some(name => name === tableName)) {
         const deleteTableParams: DeleteTableInput = {

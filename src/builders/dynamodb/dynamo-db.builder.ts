@@ -1,11 +1,13 @@
-import {DynamoDbRepository} from '../../repositories/dynamodb/dynamo-db.repository';
-import {DynamoDbRepositoryImplementation} from '../../repositories/dynamodb/dynamo-db.repository.implementation';
-import {DynamoDbRepositoryProxy} from '../../repositories/dynamodb/dynamo-db.repository.proxy';
+import { DynamoDbRepository } from '../../repositories/dynamodb/dynamo-db.repository';
+import { DynamoDbRepositoryImplementation } from '../../repositories/dynamodb/dynamo-db.repository.implementation';
+import { DynamoDbRepositoryProxy } from '../../repositories/dynamodb/dynamo-db.repository.proxy';
+import { GENERATED_SORT_KEY } from '../../models/dynamo-db-table-caracteristics.model';
 
 export class DynamoDbBuilder {
 
     private tableName: string;
-    private keyName = 'id';
+    private partitionKeyName = 'id';
+    private sortKeyName?: string;
     private readCapacity = 1;
     private writeCapacity = 1;
     private mustCreateBeforeUse = false;
@@ -15,8 +17,18 @@ export class DynamoDbBuilder {
         return this;
     }
 
-    withKeyName(keyname: string): DynamoDbBuilder {
-        this.keyName = keyname;
+    withPartitionKeyName(partitionKeyName: string): DynamoDbBuilder {
+        this.partitionKeyName = partitionKeyName;
+        return this;
+    }
+
+    withSortKeyName(sortKeyName: string): DynamoDbBuilder {
+        this.sortKeyName = sortKeyName;
+        return this;
+    }
+
+    withGeneratedSortKey(): DynamoDbBuilder {
+        this.sortKeyName = GENERATED_SORT_KEY;
         return this;
     }
 
@@ -46,14 +58,16 @@ export class DynamoDbBuilder {
             return new DynamoDbRepositoryProxy(
                 new DynamoDbRepositoryImplementation({
                     tableName: this.tableName,
-                    keyName: this.keyName,
+                    partitionKeyName: this.partitionKeyName,
+                    sortKeyName: this.sortKeyName,
                     readCapacity: this.readCapacity,
                     writeCapacity: this.writeCapacity
                 }));
         }
         return new DynamoDbRepositoryImplementation({
             tableName: this.tableName,
-            keyName: this.keyName,
+            partitionKeyName: this.partitionKeyName,
+            sortKeyName: this.sortKeyName,
             readCapacity: this.readCapacity,
             writeCapacity: this.writeCapacity
         });

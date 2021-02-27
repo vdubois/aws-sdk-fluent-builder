@@ -6,16 +6,16 @@ export declare class DynamoDbRepositoryImplementation implements DynamoDbReposit
     private dynamoDbClient;
     constructor(caracteristics: DynamoDbTableCaracteristicsModel, dynamoDbClient?: DocumentClient);
     get tableName(): string;
-    get keyName(): string;
+    get partitionKeyName(): string;
+    get sortKeyName(): string;
     get readCapacity(): number;
     get writeCapacity(): number;
-    findAll(): Promise<Array<any>>;
-    findById(id: string): Promise<any>;
-    findBy(field: string, value: string): Promise<Array<any>>;
+    private get withGeneratedSortKey();
+    findOneByPartitionKey(partitionKeyValue: string): Promise<any>;
+    findOneByPartitionKeyAndSortKey(partitionKeyValue: string, sortKeyValue: string): Promise<any>;
+    findAllByPartitionKey(partitionKeyValue: string): Promise<Array<any>>;
     save(entity: object): Promise<any>;
     saveAll(entities: Array<object>, byChunkOf?: number): Promise<void>;
-    deleteById(id: string): Promise<any>;
-    deleteAll(): Promise<void>;
-    private scan;
-    private flattenArray;
+    deleteByPartitionKey(partitionKeyValue: string): Promise<any>;
+    deleteByPartitionKeyAndSortKey(partitionKeyValue: string, sortKeyValue: string): Promise<any>;
 }

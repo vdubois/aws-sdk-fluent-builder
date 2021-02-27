@@ -1,10 +1,8 @@
 import { S3Builder } from '../../src/builders/s3/s3.builder';
 import * as needle from 'needle';
 import { deleteBucketIfExists } from '../clean-functions';
-import { createBucketIfNotExists, listBuckets } from './s3-configuration-module.spec.e2e';
-import { listFiles } from './s3-storage-module.spec.e2e';
-
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
+import { createBucketIfNotExists, listBuckets } from './s3-configuration-module.spec';
+import { listFiles } from './s3-storage-module.spec';
 
 const bucketName = 's3-hosting-module-e2e';
 const hostingService = new S3Builder()
@@ -14,16 +12,6 @@ const hostingService = new S3Builder()
     .build();
 
 describe('S3 Hosting module', () => {
-
-    let originalTimeout;
-
-    /**
-     * Sets timeout to 30s.
-     */
-    beforeEach(() => {
-        originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-        jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
-    });
 
     describe('createIfNotExists function', () => {
 
@@ -97,7 +85,7 @@ describe('S3 Hosting module', () => {
             await s3HostingService.uploadFilesFromDirectory(`${__dirname}/../data/hosting`);
             const websiteHtmlContent = await needle('get', 'http://' + bucketName + '.s3-website-' + process.env.AWS_REGION + '.amazonaws.com//index.html');
             // THEN
-            expect(websiteHtmlContent.body).toContain('S3 Hosting E2E Test');
+            expect(websiteHtmlContent.body.toString()).toContain('S3 Hosting E2E Test');
             done();
         } catch (exception) {
             fail(exception);
