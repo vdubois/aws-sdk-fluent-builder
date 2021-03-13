@@ -5,7 +5,7 @@ const cleanResources = async (): Promise<void> => {
     await deleteTableIfExist('dynamo-db-module-pk-sk-e2e');
     await deleteTableIfExist('dynamo-db-module-pk-e2e');
     await deleteTopicIfExist();
-    await deleteBucketIfExists('s3-configuration-module-e2e');
+    await deleteBucketIfExists('s3-configuration-module');
     await deleteBucketIfExists('s3-storage-module-e2e');
     await deleteBucketIfExists('s3-hosting-module-e2e');
 };

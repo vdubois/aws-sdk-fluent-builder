@@ -42,7 +42,8 @@ export const deleteBucketIfExists = async (bucketName: string) => {
             }).promise();
         }
         await s3Client.deleteBucket({Bucket: bucketName}).promise();
-        return s3Client.waitFor('bucketNotExists', {Bucket: bucketName});
+        await s3Client.waitFor('bucketNotExists', {Bucket: bucketName});
+        return Promise.resolve({});
     } else {
         return Promise.resolve({});
     }

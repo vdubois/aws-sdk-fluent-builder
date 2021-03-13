@@ -2,7 +2,7 @@ import { S3Builder } from '../../src/builders/s3/s3.builder';
 import { deleteBucketIfExists } from '../clean-functions';
 import S3 = require('aws-sdk/clients/s3');
 
-const bucketName = 's3-configuration-module-e2e-tests';
+const bucketName = 's3-configuration-module';
 
 describe('S3 Configuration module', () => {
 
@@ -16,7 +16,7 @@ describe('S3 Configuration module', () => {
                 .asConfigurationService()
                 .withContents({test: 'value'})
                 .build();
-            await deleteBucketIfExists('s3-configuration-module-e2e-tests');
+            await deleteBucketIfExists(bucketName);
 
             try {
                 const value = await configurationService.get('test');
@@ -41,7 +41,7 @@ describe('S3 Configuration module', () => {
                 .asConfigurationService()
                 .withContents({test: 'value'})
                 .build();
-            await createBucketIfNotExists('s3-configuration-module-e2e-tests');
+            await createBucketIfNotExists(bucketName);
 
             try {
                 const value = await configurationService.get('test');
