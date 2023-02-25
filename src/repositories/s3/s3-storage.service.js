@@ -10,9 +10,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.S3StorageService = void 0;
-const S3 = require("aws-sdk/clients/s3");
+const client_s3_1 = require("@aws-sdk/client-s3");
+const configuration_1 = require("../configuration/configuration");
 class S3StorageService {
-    constructor(bucketName, mustCreateBeforeUse, s3Client = new S3({ region: process.env.AWS_REGION })) {
+    constructor(bucketName, mustCreateBeforeUse, s3Client = new client_s3_1.S3Client({ region: process.env.AWS_REGION })) {
         this.bucketName = bucketName;
         this.mustCreateBeforeUse = mustCreateBeforeUse;
         this.s3Client = s3Client;
@@ -26,10 +27,13 @@ class S3StorageService {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 yield this.createBucketIfNecesary();
-                const { Contents } = yield this.s3Client.listObjects({ Bucket: this.bucketName }).promise();
-                return Contents
-                    .map(file => file.Key)
-                    .filter(predicate);
+                const { Contents } = yield this.s3Client.send(new client_s3_1.ListObjectsV2Command({ Bucket: this.bucketName }));
+                if (Contents) {
+                    return Contents
+                        .map(file => file.Key)
+                        .filter(predicate);
+                }
+                return [];
             }
             catch (exception) {
                 throw new Error(`listFiles function : ${exception}`);
@@ -45,11 +49,12 @@ class S3StorageService {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 yield this.createBucketIfNecesary();
-                const file = yield this.s3Client.getObject({
+                const file = yield this.s3Client.send(new client_s3_1.GetObjectCommand({
                     Bucket: this.bucketName,
                     Key: filePath
-                }).promise();
-                return file.Body;
+                }));
+                const fileContent = yield file.Body.transformToByteArray();
+                return Buffer.from(fileContent);
             }
             catch (exception) {
                 throw new Error(`readFile function : ${exception}`);
@@ -66,11 +71,11 @@ class S3StorageService {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 yield this.createBucketIfNecesary();
-                return yield this.s3Client.upload({
+                return this.s3Client.send(new client_s3_1.PutObjectCommand({
                     Bucket: this.bucketName,
                     Key: filePath,
                     Body: fileContent
-                }).promise();
+                }));
             }
             catch (exception) {
                 throw new Error(`writeFile function : ${exception}`);
@@ -86,10 +91,10 @@ class S3StorageService {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 yield this.createBucketIfNecesary();
-                return yield this.s3Client.deleteObject({
+                return yield this.s3Client.send(new client_s3_1.DeleteObjectCommand({
                     Bucket: this.bucketName,
                     Key: filePath
-                }).promise();
+                }));
             }
             catch (exception) {
                 throw new Error(`deleteFile function : ${exception}`);
@@ -109,11 +114,11 @@ class S3StorageService {
             }
             try {
                 yield this.createBucketIfNecesary();
-                return yield this.s3Client.copyObject({
+                return yield this.s3Client.send(new client_s3_1.CopyObjectCommand({
                     Bucket: this.bucketName,
                     CopySource: `${this.bucketName}/${sourceFilePath}`,
                     Key: destinationFilePath
-                }).promise();
+                }));
             }
             catch (exception) {
                 throw new Error(`copyFile function : ${exception}`);
@@ -123,13 +128,13 @@ class S3StorageService {
     createBucketIfNecesary() {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.mustCreateBeforeUse) {
-                const { Buckets } = yield this.s3Client.listBuckets().promise();
+                const { Buckets } = yield this.s3Client.send(new client_s3_1.ListBucketsCommand({}));
                 if (Buckets.some(bucket => bucket.Name === this.bucketName)) {
                     return Promise.resolve({});
                 }
                 else {
-                    yield this.s3Client.createBucket({ Bucket: this.bucketName }).promise();
-                    return this.s3Client.waitFor('bucketExists', { Bucket: this.bucketName });
+                    yield this.s3Client.send(new client_s3_1.CreateBucketCommand({ Bucket: this.bucketName }));
+                    return client_s3_1.waitUntilBucketExists({ client: this.s3Client, maxWaitTime: configuration_1.MAX_WAIT_TIME_IN_SECONDS }, { Bucket: this.bucketName });
                 }
             }
             else {

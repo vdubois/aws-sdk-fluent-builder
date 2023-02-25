@@ -5,7 +5,8 @@
     "strict": false,
     "declaration": true,
     "lib": [
-      "ES2015"
+      "ES2015",
+      "dom"
     ],
     "outDir": "./",
     "rootDir": "./"

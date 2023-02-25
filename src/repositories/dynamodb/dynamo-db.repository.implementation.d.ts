@@ -1,10 +1,10 @@
 import { DynamoDbRepository } from './dynamo-db.repository';
-import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { DynamoDbTableCaracteristicsModel } from '../../models/dynamo-db-table-caracteristics.model';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 export declare class DynamoDbRepositoryImplementation implements DynamoDbRepository {
     private caracteristics;
     private dynamoDbClient;
-    constructor(caracteristics: DynamoDbTableCaracteristicsModel, dynamoDbClient?: DocumentClient);
+    constructor(caracteristics: DynamoDbTableCaracteristicsModel, dynamoDbClient?: DynamoDBClient);
     get tableName(): string;
     get partitionKeyName(): string;
     get sortKeyName(): string;

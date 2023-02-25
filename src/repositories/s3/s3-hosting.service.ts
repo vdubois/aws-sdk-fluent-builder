@@ -1,11 +1,20 @@
-import * as S3 from 'aws-sdk/clients/s3';
+import {
+    CreateBucketCommand,
+    ListBucketsCommand, PutBucketPolicyCommand,
+    PutBucketPolicyCommandInput, PutBucketWebsiteCommand,
+    PutBucketWebsiteCommandInput, PutObjectCommand,
+    S3Client, waitUntilBucketExists
+} from '@aws-sdk/client-s3';
 import * as fs from 'fs';
 import * as path from 'path';
-import { PutBucketPolicyRequest, PutBucketWebsiteRequest } from 'aws-sdk/clients/s3';
+import {MAX_WAIT_TIME_IN_SECONDS} from '../configuration/configuration';
 
 export class S3HostingService {
 
-    constructor(private bucketName: string, private mustCreateBeforeUse, private s3Client = new S3({region: process.env.AWS_REGION})) {
+    constructor(
+        private bucketName: string,
+        private mustCreateBeforeUse,
+        private s3Client = new S3Client({region: process.env.AWS_REGION})) {
     }
 
     async uploadFilesFromDirectory(sourceDirectoryPath: string, destinationPathInBucket = ''): Promise<void> {
@@ -27,24 +36,26 @@ export class S3HostingService {
         await this.exposeBucketAsPublicWebsite();
         let uploadIndex = 1;
         for (const file of files) {
-            await this.s3Client.upload({
-                Bucket: this.bucketName,
-                Key: destinationPathInBucket + file.substring(path.normalize(sourceDirectoryPath).length),
-                Body: fs.readFileSync(file)
-            }).promise();
+            await this.s3Client.send(new PutObjectCommand({
+                    Bucket: this.bucketName,
+                    Key: destinationPathInBucket + file.substring(path.normalize(sourceDirectoryPath).length),
+                    Body: fs.readFileSync(file)
+            }));
             console.log(`[uploadFilesFromDirectory] (${uploadIndex++}/${files.length}) uploaded ${file}`);
         }
     }
 
     private async createBucketIfNecesary(): Promise<any> {
         if (this.mustCreateBeforeUse) {
-            const results = await this.s3Client.listBuckets().promise();
+            const results = await this.s3Client.send(new ListBucketsCommand({}));
             const buckets = results.Buckets;
             if (buckets.some(bucket => bucket.Name === this.bucketName)) {
                 return Promise.resolve({});
             } else {
-                await this.s3Client.createBucket({Bucket: this.bucketName}).promise();
-                return this.s3Client.waitFor('bucketExists', {Bucket: this.bucketName});
+                await this.s3Client.send(new CreateBucketCommand({Bucket: this.bucketName}));
+                return waitUntilBucketExists(
+                    {client: this.s3Client, maxWaitTime: MAX_WAIT_TIME_IN_SECONDS},
+                    {Bucket: this.bucketName});
             }
         } else {
             return Promise.resolve({});
@@ -66,11 +77,11 @@ export class S3HostingService {
                 ]
             }
         `.trim();
-        const bucketPolicyParams: PutBucketPolicyRequest = {
+        const bucketPolicyParams: PutBucketPolicyCommandInput = {
           Bucket: this.bucketName,
           Policy: policyContent
         };
-        const bucketWebsiteParams: PutBucketWebsiteRequest = {
+        const bucketWebsiteParams: PutBucketWebsiteCommandInput = {
             Bucket: this.bucketName,
             WebsiteConfiguration: {
                 IndexDocument: {
@@ -78,8 +89,8 @@ export class S3HostingService {
                 }
             }
         };
-        await this.s3Client.putBucketPolicy(bucketPolicyParams).promise();
-        return this.s3Client.putBucketWebsite(bucketWebsiteParams).promise();
+        await this.s3Client.send(new PutBucketPolicyCommand(bucketPolicyParams));
+        return this.s3Client.send(new PutBucketWebsiteCommand(bucketWebsiteParams));
     }
 
     private walkDirectorySync(directoryPath, filelist = []): Array<any> {

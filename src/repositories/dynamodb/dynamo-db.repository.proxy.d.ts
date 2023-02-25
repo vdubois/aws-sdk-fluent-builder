@@ -1,10 +1,10 @@
 import { DynamoDbRepository } from './dynamo-db.repository';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDbRepositoryImplementation } from './dynamo-db.repository.implementation';
-import * as DynamoDB from 'aws-sdk/clients/dynamodb';
 export declare class DynamoDbRepositoryProxy implements DynamoDbRepository {
     private dynamoDbRepository;
     private dynamoDbClient;
-    constructor(dynamoDbRepository: DynamoDbRepositoryImplementation, dynamoDbClient?: DynamoDB);
+    constructor(dynamoDbRepository: DynamoDbRepositoryImplementation, dynamoDbClient?: DynamoDBClient);
     createIfNotExists(): Promise<any>;
     private attributeDefinitions;
     private keySchema;

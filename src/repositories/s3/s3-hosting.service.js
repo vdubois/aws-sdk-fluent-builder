@@ -10,11 +10,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.S3HostingService = void 0;
-const S3 = require("aws-sdk/clients/s3");
+const client_s3_1 = require("@aws-sdk/client-s3");
 const fs = require("fs");
 const path = require("path");
+const configuration_1 = require("../configuration/configuration");
 class S3HostingService {
-    constructor(bucketName, mustCreateBeforeUse, s3Client = new S3({ region: process.env.AWS_REGION })) {
+    constructor(bucketName, mustCreateBeforeUse, s3Client = new client_s3_1.S3Client({ region: process.env.AWS_REGION })) {
         this.bucketName = bucketName;
         this.mustCreateBeforeUse = mustCreateBeforeUse;
         this.s3Client = s3Client;
@@ -39,11 +40,11 @@ class S3HostingService {
             yield this.exposeBucketAsPublicWebsite();
             let uploadIndex = 1;
             for (const file of files) {
-                yield this.s3Client.upload({
+                yield this.s3Client.send(new client_s3_1.PutObjectCommand({
                     Bucket: this.bucketName,
                     Key: destinationPathInBucket + file.substring(path.normalize(sourceDirectoryPath).length),
                     Body: fs.readFileSync(file)
-                }).promise();
+                }));
                 console.log(`[uploadFilesFromDirectory] (${uploadIndex++}/${files.length}) uploaded ${file}`);
             }
         });
@@ -51,14 +52,14 @@ class S3HostingService {
     createBucketIfNecesary() {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.mustCreateBeforeUse) {
-                const results = yield this.s3Client.listBuckets().promise();
+                const results = yield this.s3Client.send(new client_s3_1.ListBucketsCommand({}));
                 const buckets = results.Buckets;
                 if (buckets.some(bucket => bucket.Name === this.bucketName)) {
                     return Promise.resolve({});
                 }
                 else {
-                    yield this.s3Client.createBucket({ Bucket: this.bucketName }).promise();
-                    return this.s3Client.waitFor('bucketExists', { Bucket: this.bucketName });
+                    yield this.s3Client.send(new client_s3_1.CreateBucketCommand({ Bucket: this.bucketName }));
+                    return client_s3_1.waitUntilBucketExists({ client: this.s3Client, maxWaitTime: configuration_1.MAX_WAIT_TIME_IN_SECONDS }, { Bucket: this.bucketName });
                 }
             }
             else {
@@ -94,8 +95,8 @@ class S3HostingService {
                     }
                 }
             };
-            yield this.s3Client.putBucketPolicy(bucketPolicyParams).promise();
-            return this.s3Client.putBucketWebsite(bucketWebsiteParams).promise();
+            yield this.s3Client.send(new client_s3_1.PutBucketPolicyCommand(bucketPolicyParams));
+            return this.s3Client.send(new client_s3_1.PutBucketWebsiteCommand(bucketWebsiteParams));
         });
     }
     walkDirectorySync(directoryPath, filelist = []) {

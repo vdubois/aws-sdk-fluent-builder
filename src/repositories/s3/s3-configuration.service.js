@@ -10,9 +10,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.S3ConfigurationService = void 0;
-const S3 = require("aws-sdk/clients/s3");
+const client_s3_1 = require("@aws-sdk/client-s3");
+const configuration_1 = require("../configuration/configuration");
 class S3ConfigurationService {
-    constructor(_bucketName, fileName, contents, mustCreateBeforeUse, s3Client = new S3({ region: process.env.AWS_REGION })) {
+    constructor(_bucketName, fileName, contents, mustCreateBeforeUse, s3Client = new client_s3_1.S3Client({ region: process.env.AWS_REGION })) {
         this._bucketName = _bucketName;
         this.fileName = fileName;
         this.contents = contents;
@@ -48,13 +49,13 @@ class S3ConfigurationService {
     createBucketIfNecesary() {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.mustCreateBeforeUse) {
-                const { Buckets } = yield this.s3Client.listBuckets().promise();
+                const { Buckets } = yield this.s3Client.send(new client_s3_1.ListBucketsCommand({}));
                 if (Buckets.some(bucket => bucket.Name === this.bucketName)) {
                     return Promise.resolve({});
                 }
                 else {
-                    yield this.s3Client.createBucket({ Bucket: this.bucketName }).promise();
-                    return this.s3Client.waitFor('bucketExists', { Bucket: this.bucketName });
+                    yield this.s3Client.send(new client_s3_1.CreateBucketCommand({ Bucket: this.bucketName }));
+                    return client_s3_1.waitUntilBucketExists({ client: this.s3Client, maxWaitTime: configuration_1.MAX_WAIT_TIME_IN_SECONDS }, { Bucket: this.bucketName });
                 }
             }
             else {
@@ -65,12 +66,12 @@ class S3ConfigurationService {
     overrideConfiguration() {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.contents) {
-                yield this.s3Client.upload({
+                yield this.s3Client.send(new client_s3_1.PutObjectCommand({
                     Bucket: this.bucketName,
                     Key: this.fileName,
                     Body: JSON.stringify(this.contents, null, 2)
-                }).promise();
-                return this.s3Client.waitFor('objectExists', { Bucket: this.bucketName, Key: this.fileName });
+                }));
+                return client_s3_1.waitUntilObjectExists({ client: this.s3Client, maxWaitTime: configuration_1.MAX_WAIT_TIME_IN_SECONDS }, { Bucket: this.bucketName, Key: this.fileName });
             }
             else {
                 return Promise.resolve({});
@@ -90,8 +91,9 @@ class S3ConfigurationService {
                         Bucket: this._bucketName,
                         Key: this.fileName
                     };
-                    const result = yield this.s3Client.getObject(getObjectParams).promise();
-                    this.configuration = JSON.parse(result.Body.toString());
+                    const result = yield this.s3Client.send(new client_s3_1.GetObjectCommand(getObjectParams));
+                    const fileContent = yield result.Body.transformToString('utf8');
+                    this.configuration = JSON.parse(fileContent);
                     return this.configuration;
                 }
                 catch (error) {

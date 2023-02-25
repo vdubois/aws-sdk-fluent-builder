@@ -1,4 +1,4 @@
-import * as S3 from 'aws-sdk/clients/s3';
+import { S3Client } from '@aws-sdk/client-s3';
 export declare class S3ConfigurationService {
     private _bucketName;
     private fileName;
@@ -6,7 +6,7 @@ export declare class S3ConfigurationService {
     private mustCreateBeforeUse;
     private s3Client;
     private configuration;
-    constructor(_bucketName: string, fileName: string, contents: object, mustCreateBeforeUse: boolean, s3Client?: S3);
+    constructor(_bucketName: string, fileName: string, contents: object, mustCreateBeforeUse: boolean, s3Client?: S3Client);
     get bucketName(): string;
     /**
      * Get a configuration value using its key (based on JSON object)

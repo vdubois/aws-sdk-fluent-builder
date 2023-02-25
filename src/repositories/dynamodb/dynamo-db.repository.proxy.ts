@@ -1,16 +1,22 @@
-import { DynamoDbRepository } from './dynamo-db.repository';
-import * as DynamoDB from 'aws-sdk/clients/dynamodb';
-import { CreateTableInput } from 'aws-sdk/clients/dynamodb';
-import { DynamoDbRepositoryImplementation } from './dynamo-db.repository.implementation';
+import {DynamoDbRepository} from './dynamo-db.repository';
+import {
+    CreateTableCommand,
+    CreateTableCommandInput,
+    DynamoDBClient,
+    ListTablesCommand,
+    waitUntilTableExists
+} from '@aws-sdk/client-dynamodb';
+import {DynamoDbRepositoryImplementation} from './dynamo-db.repository.implementation';
+import {MAX_WAIT_TIME_IN_SECONDS} from '../configuration/configuration';
 
 export class DynamoDbRepositoryProxy implements DynamoDbRepository {
 
     constructor(private dynamoDbRepository: DynamoDbRepositoryImplementation,
-        private dynamoDbClient: DynamoDB = new DynamoDB({region: process.env.AWS_REGION})) {
+        private dynamoDbClient: DynamoDBClient = new DynamoDBClient({region: process.env.AWS_REGION})) {
     }
 
     async createIfNotExists(): Promise<any> {
-        const createTableParams: CreateTableInput = {
+        const createTableParams: CreateTableCommandInput = {
             TableName: this.dynamoDbRepository.tableName,
             AttributeDefinitions: this.attributeDefinitions(),
             KeySchema: this.keySchema(),
@@ -19,12 +25,14 @@ export class DynamoDbRepositoryProxy implements DynamoDbRepository {
                 WriteCapacityUnits: this.dynamoDbRepository.writeCapacity
             }
         };
-        const results = await this.dynamoDbClient.listTables().promise();
+        const results = await this.dynamoDbClient.send(new ListTablesCommand({}));
         if (results.TableNames.some(name => this.dynamoDbRepository.tableName === name)) {
             return Promise.resolve({});
         } else {
-            await this.dynamoDbClient.createTable(createTableParams).promise();
-            return this.dynamoDbClient.waitFor('tableExists', {TableName: this.dynamoDbRepository.tableName}).promise();
+            await this.dynamoDbClient.send(new CreateTableCommand(createTableParams));
+            return waitUntilTableExists(
+                {client: this.dynamoDbClient, maxWaitTime: MAX_WAIT_TIME_IN_SECONDS},
+                {TableName: this.dynamoDbRepository.tableName});
         }
     }
 

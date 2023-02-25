@@ -1,10 +1,18 @@
-import * as S3 from 'aws-sdk/clients/s3';
+import {
+    CopyObjectCommand, CreateBucketCommand,
+    DeleteObjectCommand,
+    GetObjectCommand, ListBucketsCommand,
+    ListObjectsV2Command, PutObjectCommand,
+    S3Client,
+    waitUntilBucketExists
+} from '@aws-sdk/client-s3';
+import {MAX_WAIT_TIME_IN_SECONDS} from '../configuration/configuration';
 
 export class S3StorageService {
 
     constructor(private bucketName: string,
                 private mustCreateBeforeUse: boolean,
-                private s3Client = new S3({ region: process.env.AWS_REGION })) {
+                private s3Client = new S3Client({region: process.env.AWS_REGION})) {
     }
 
     /**
@@ -15,10 +23,13 @@ export class S3StorageService {
     async listFiles(predicate = (file) => true): Promise<any> {
         try {
             await this.createBucketIfNecesary();
-            const {Contents} = await this.s3Client.listObjects({Bucket: this.bucketName}).promise();
-            return Contents
-                .map(file => file.Key)
-                .filter(predicate);
+            const {Contents} = await this.s3Client.send(new ListObjectsV2Command({Bucket: this.bucketName}));
+            if (Contents) {
+                return Contents
+                    .map(file => file.Key)
+                    .filter(predicate);
+            }
+            return [];
         } catch (exception) {
             throw new Error(`listFiles function : ${exception}`);
         }
@@ -32,11 +43,12 @@ export class S3StorageService {
     async readFile(filePath: string): Promise<any> {
         try {
             await this.createBucketIfNecesary();
-            const file = await this.s3Client.getObject({
+            const file = await this.s3Client.send(new GetObjectCommand({
                 Bucket: this.bucketName,
                 Key: filePath
-            }).promise();
-            return file.Body;
+            }));
+            const fileContent = await file.Body.transformToByteArray();
+            return Buffer.from(fileContent);
         } catch (exception) {
             throw new Error(`readFile function : ${exception}`);
         }
@@ -51,11 +63,11 @@ export class S3StorageService {
     async writeFile(filePath: string, fileContent: Buffer): Promise<any> {
         try {
             await this.createBucketIfNecesary();
-            return await this.s3Client.upload({
+            return this.s3Client.send(new PutObjectCommand({
                 Bucket: this.bucketName,
                 Key: filePath,
                 Body: fileContent
-            }).promise();
+            }));
         } catch (exception) {
             throw new Error(`writeFile function : ${exception}`);
         }
@@ -69,10 +81,10 @@ export class S3StorageService {
     async deleteFile(filePath: string): Promise<any> {
         try {
             await this.createBucketIfNecesary();
-            return await this.s3Client.deleteObject({
+            return await this.s3Client.send(new DeleteObjectCommand({
                 Bucket: this.bucketName,
                 Key: filePath
-            }).promise();
+            }));
         } catch (exception) {
             throw new Error(`deleteFile function : ${exception}`);
         }
@@ -90,11 +102,11 @@ export class S3StorageService {
         }
         try {
             await this.createBucketIfNecesary();
-            return await this.s3Client.copyObject({
+            return await this.s3Client.send(new CopyObjectCommand({
                 Bucket: this.bucketName,
                 CopySource: `${this.bucketName}/${sourceFilePath}`,
                 Key: destinationFilePath
-            }).promise();
+            }));
         } catch (exception) {
             throw new Error(`copyFile function : ${exception}`);
         }
@@ -102,12 +114,14 @@ export class S3StorageService {
 
     private async createBucketIfNecesary(): Promise<any> {
         if (this.mustCreateBeforeUse) {
-            const {Buckets} = await this.s3Client.listBuckets().promise();
+            const {Buckets} = await this.s3Client.send(new ListBucketsCommand({}));
             if (Buckets.some(bucket => bucket.Name === this.bucketName)) {
                 return Promise.resolve({});
             } else {
-                await this.s3Client.createBucket({Bucket: this.bucketName}).promise();
-                return this.s3Client.waitFor('bucketExists', {Bucket: this.bucketName});
+                await this.s3Client.send(new CreateBucketCommand({Bucket: this.bucketName}));
+                return waitUntilBucketExists(
+                    {client: this.s3Client, maxWaitTime: MAX_WAIT_TIME_IN_SECONDS},
+                    {Bucket: this.bucketName});
             }
         } else {
             return Promise.resolve({});

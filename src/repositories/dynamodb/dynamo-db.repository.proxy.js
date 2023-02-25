@@ -10,9 +10,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DynamoDbRepositoryProxy = void 0;
-const DynamoDB = require("aws-sdk/clients/dynamodb");
+const client_dynamodb_1 = require("@aws-sdk/client-dynamodb");
+const configuration_1 = require("../configuration/configuration");
 class DynamoDbRepositoryProxy {
-    constructor(dynamoDbRepository, dynamoDbClient = new DynamoDB({ region: process.env.AWS_REGION })) {
+    constructor(dynamoDbRepository, dynamoDbClient = new client_dynamodb_1.DynamoDBClient({ region: process.env.AWS_REGION })) {
         this.dynamoDbRepository = dynamoDbRepository;
         this.dynamoDbClient = dynamoDbClient;
     }
@@ -27,13 +28,13 @@ class DynamoDbRepositoryProxy {
                     WriteCapacityUnits: this.dynamoDbRepository.writeCapacity
                 }
             };
-            const results = yield this.dynamoDbClient.listTables().promise();
+            const results = yield this.dynamoDbClient.send(new client_dynamodb_1.ListTablesCommand({}));
             if (results.TableNames.some(name => this.dynamoDbRepository.tableName === name)) {
                 return Promise.resolve({});
             }
             else {
-                yield this.dynamoDbClient.createTable(createTableParams).promise();
-                return this.dynamoDbClient.waitFor('tableExists', { TableName: this.dynamoDbRepository.tableName }).promise();
+                yield this.dynamoDbClient.send(new client_dynamodb_1.CreateTableCommand(createTableParams));
+                return client_dynamodb_1.waitUntilTableExists({ client: this.dynamoDbClient, maxWaitTime: configuration_1.MAX_WAIT_TIME_IN_SECONDS }, { TableName: this.dynamoDbRepository.tableName });
             }
         });
     }

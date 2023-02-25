@@ -10,24 +10,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SnsImplementation = void 0;
-const SNS = require("aws-sdk/clients/sns");
+const client_sns_1 = require("@aws-sdk/client-sns");
 class SnsImplementation {
-    constructor(_topicName, snsClient = new SNS({ region: process.env.AWS_REGION })) {
+    constructor(_topicName, snsClient = new client_sns_1.SNSClient({ region: process.env.AWS_REGION })) {
         this._topicName = _topicName;
         this.snsClient = snsClient;
     }
     publishMessage(message) {
         return __awaiter(this, void 0, void 0, function* () {
             const topicArn = yield this.findTopicArn();
-            return this.snsClient.publish({
+            return this.snsClient.send(new client_sns_1.PublishCommand({
                 TopicArn: topicArn,
                 Message: JSON.stringify(message)
-            }).promise();
+            }));
         });
     }
     findTopicArn() {
         return __awaiter(this, void 0, void 0, function* () {
-            const { Topics } = yield this.snsClient.listTopics().promise();
+            const { Topics } = yield this.snsClient.send(new client_sns_1.ListTopicsCommand({}));
             return Topics.find(topic => topic.TopicArn.indexOf(this._topicName) !== -1).TopicArn;
         });
     }

@@ -1,5 +1,12 @@
-import * as S3 from 'aws-sdk/clients/s3';
-import { GetObjectRequest } from 'aws-sdk/clients/s3';
+import {
+    CreateBucketCommand, GetObjectCommand,
+    GetObjectCommandInput,
+    ListBucketsCommand, PutObjectCommand,
+    S3Client,
+    waitUntilBucketExists,
+    waitUntilObjectExists
+} from '@aws-sdk/client-s3';
+import {MAX_WAIT_TIME_IN_SECONDS} from '../configuration/configuration';
 
 export class S3ConfigurationService {
 
@@ -8,7 +15,7 @@ export class S3ConfigurationService {
     constructor(private _bucketName: string, private fileName: string,
                 private contents: object,
                 private mustCreateBeforeUse: boolean,
-                private s3Client = new S3({region: process.env.AWS_REGION})) {
+                private s3Client = new S3Client({region: process.env.AWS_REGION})) {
     }
 
     get bucketName(): string {
@@ -39,12 +46,14 @@ export class S3ConfigurationService {
 
     private async createBucketIfNecesary(): Promise<any> {
         if (this.mustCreateBeforeUse) {
-            const { Buckets } = await this.s3Client.listBuckets().promise();
+            const {Buckets} = await this.s3Client.send(new ListBucketsCommand({}));
             if (Buckets.some(bucket => bucket.Name === this.bucketName)) {
                 return Promise.resolve({});
             } else {
-                await this.s3Client.createBucket({Bucket: this.bucketName}).promise();
-                return this.s3Client.waitFor('bucketExists', {Bucket: this.bucketName});
+                await this.s3Client.send(new CreateBucketCommand({Bucket: this.bucketName}));
+                return waitUntilBucketExists(
+                    {client: this.s3Client, maxWaitTime: MAX_WAIT_TIME_IN_SECONDS},
+                    {Bucket: this.bucketName});
             }
         } else {
             return Promise.resolve({});
@@ -53,12 +62,14 @@ export class S3ConfigurationService {
 
     private async overrideConfiguration(): Promise<any> {
         if (this.contents) {
-            await this.s3Client.upload({
+            await this.s3Client.send(new PutObjectCommand({
                 Bucket: this.bucketName,
                 Key: this.fileName,
                 Body: JSON.stringify(this.contents, null, 2)
-            }).promise();
-            return this.s3Client.waitFor('objectExists', {Bucket: this.bucketName, Key: this.fileName});
+            }));
+            return waitUntilObjectExists(
+                {client: this.s3Client, maxWaitTime: MAX_WAIT_TIME_IN_SECONDS},
+                {Bucket: this.bucketName, Key: this.fileName});
         } else {
             return Promise.resolve({});
         }
@@ -71,12 +82,13 @@ export class S3ConfigurationService {
             await this.createBucketIfNecesary();
             await this.overrideConfiguration();
             try {
-                const getObjectParams: GetObjectRequest = {
+                const getObjectParams: GetObjectCommandInput = {
                     Bucket: this._bucketName,
                     Key: this.fileName
                 };
-                const result = await this.s3Client.getObject(getObjectParams).promise();
-                this.configuration = JSON.parse(result.Body.toString());
+                const result = await this.s3Client.send(new GetObjectCommand(getObjectParams));
+                const fileContent = await result.Body.transformToString('utf8');
+                this.configuration = JSON.parse(fileContent);
                 return this.configuration;
             } catch (error) {
                 throw new Error(`${this.fileName} file does not exist in bucket`);

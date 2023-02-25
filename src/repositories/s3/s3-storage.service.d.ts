@@ -1,10 +1,10 @@
 /// <reference types="node" />
-import * as S3 from 'aws-sdk/clients/s3';
+import { S3Client } from '@aws-sdk/client-s3';
 export declare class S3StorageService {
     private bucketName;
     private mustCreateBeforeUse;
     private s3Client;
-    constructor(bucketName: string, mustCreateBeforeUse: boolean, s3Client?: S3);
+    constructor(bucketName: string, mustCreateBeforeUse: boolean, s3Client?: S3Client);
     /**
      * List files in bucket using an optional predicate
      * @param {(file) => boolean} predicate

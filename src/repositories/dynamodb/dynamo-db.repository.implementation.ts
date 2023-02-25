@@ -1,14 +1,20 @@
 import { DynamoDbRepository } from './dynamo-db.repository';
-import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { DynamoDbTableCaracteristicsModel, GENERATED_SORT_KEY } from '../../models/dynamo-db-table-caracteristics.model';
-import { DynamoDB } from 'aws-sdk';
 import { v4 as uuid } from 'uuid';
-import PutItemInput = DocumentClient.PutItemInput;
+import {
+  BatchWriteItemCommand, DeleteItemCommand,
+  DynamoDBClient,
+  GetItemCommand, GetItemCommandInput,
+  PutItemCommand,
+  QueryCommand,
+  QueryCommandInput
+} from '@aws-sdk/client-dynamodb';
+import {dynamoDBItemToItem, itemToDynamoDBItem} from './dynamo-db-item';
 
 export class DynamoDbRepositoryImplementation implements DynamoDbRepository {
 
   public constructor(private caracteristics: DynamoDbTableCaracteristicsModel,
-                     private dynamoDbClient: DocumentClient = new DocumentClient({region: process.env.AWS_REGION})) {
+                     private dynamoDbClient: DynamoDBClient = new DynamoDBClient({region: process.env.AWS_REGION})) {
   }
 
   get tableName(): string {
@@ -40,34 +46,49 @@ export class DynamoDbRepositoryImplementation implements DynamoDbRepository {
       TableName: this.tableName,
     };
     getParams.Key = {};
-    getParams.Key[this.partitionKeyName] = partitionKeyValue;
-    const result = await this.dynamoDbClient.get(getParams).promise();
-    return result.Item;
+    getParams.Key[this.partitionKeyName] = {
+      'S': partitionKeyValue
+    };
+    const command = new GetItemCommand(getParams);
+    const result = await this.dynamoDbClient.send(command);
+    if (result.Item) {
+      return dynamoDBItemToItem(result.Item);
+    }
+    return undefined;
   }
 
   async findOneByPartitionKeyAndSortKey(partitionKeyValue: string, sortKeyValue: string): Promise<any> {
     const getParams: any = {
-      TableName: this.tableName,
+      TableName: this.tableName
     };
     getParams.Key = {};
-    getParams.Key[this.partitionKeyName] = partitionKeyValue;
-    getParams.Key[this.sortKeyName] = sortKeyValue;
-    const result = await this.dynamoDbClient.get(getParams).promise();
-    return result.Item;
+    getParams.Key[this.partitionKeyName] = {
+      'S': partitionKeyValue
+    };
+    getParams.Key[this.sortKeyName] = {
+      'S': sortKeyValue
+    };
+    const command = new GetItemCommand(getParams);
+    const result = await this.dynamoDbClient.send(command);
+    if (result.Item) {
+      return dynamoDBItemToItem(result.Item);
+    }
+    return undefined;
   }
 
   async findAllByPartitionKey(partitionKeyValue: string): Promise<Array<any>> {
-    let queryParams: DynamoDB.QueryInput;
+    let queryParams: QueryCommandInput;
     queryParams = {
       TableName: this.tableName,
       KeyConditionExpression: `${this.partitionKeyName} = :pk`,
       ExpressionAttributeValues: {
         // @ts-ignore
-        ':pk': partitionKeyValue
+        ':pk': {'S': partitionKeyValue}
       }
     };
-    const results = await this.dynamoDbClient.query(queryParams).promise();
-    return results.Items;
+    const command = new QueryCommand(queryParams);
+    const results = await this.dynamoDbClient.send(command);
+    return results.Items.map(item => dynamoDBItemToItem(item));
   }
 
   save(entity: object): Promise<any> {
@@ -75,11 +96,12 @@ export class DynamoDbRepositoryImplementation implements DynamoDbRepository {
     const putParams: PutItemInput = {
       TableName: this.tableName,
     };
-    putParams.Item = entity;
+    putParams.Item = itemToDynamoDBItem(entity);
     if (this.withGeneratedSortKey) {
-      putParams.Item[`${GENERATED_SORT_KEY}`] = uuid();
+      putParams.Item[`${GENERATED_SORT_KEY}`] = {'S': uuid()};
     }
-    return this.dynamoDbClient.put(putParams).promise();
+    const command = new PutItemCommand(putParams);
+    return this.dynamoDbClient.send(command);
   }
 
   async saveAll(entities: Array<object>, byChunkOf: number = 25): Promise<void> {
@@ -101,15 +123,16 @@ export class DynamoDbRepositoryImplementation implements DynamoDbRepository {
       putParams.RequestItems[this.tableName] = entitiesToSave.map(entity => {
         const putRequest = {
           PutRequest: {
-            Item: entity
+            Item: itemToDynamoDBItem(entity)
           }
         };
         if (this.withGeneratedSortKey) {
-          putRequest.PutRequest.Item[GENERATED_SORT_KEY] = uuid();
+          putRequest.PutRequest.Item[GENERATED_SORT_KEY] = {'S': uuid()};
         }
         return putRequest;
       });
-      await this.dynamoDbClient.batchWrite(putParams).promise();
+      const command = new BatchWriteItemCommand(putParams);
+      await this.dynamoDbClient.send(command);
     }
   }
 
@@ -118,8 +141,11 @@ export class DynamoDbRepositoryImplementation implements DynamoDbRepository {
       TableName: this.tableName,
     };
     deleteParams.Key = {};
-    deleteParams.Key[this.partitionKeyName] = partitionKeyValue;
-    return this.dynamoDbClient.delete(deleteParams).promise();
+    deleteParams.Key[this.partitionKeyName] = {
+      'S': partitionKeyValue
+    };
+    const command = new DeleteItemCommand(deleteParams);
+    return this.dynamoDbClient.send(command);
   }
 
   deleteByPartitionKeyAndSortKey(partitionKeyValue: string, sortKeyValue: string): Promise<any> {
@@ -127,8 +153,13 @@ export class DynamoDbRepositoryImplementation implements DynamoDbRepository {
       TableName: this.tableName,
     };
     deleteParams.Key = {};
-    deleteParams.Key[this.partitionKeyName] = partitionKeyValue;
-    deleteParams.Key[this.sortKeyName] = sortKeyValue;
-    return this.dynamoDbClient.delete(deleteParams).promise();
+    deleteParams.Key[this.partitionKeyName] = {
+      'S': partitionKeyValue
+    };
+    deleteParams.Key[this.sortKeyName] = {
+      'S': sortKeyValue
+    };
+    const command = new DeleteItemCommand(deleteParams);
+    return this.dynamoDbClient.send(command);
   }
 }
