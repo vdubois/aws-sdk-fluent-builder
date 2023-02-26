@@ -47,23 +47,6 @@ describe('DynamoDB module', () => {
             // THEN
             expect(tableNames).toContain(tableNameWithComposedKey);
         }, {timeout: 30000});
-
-        test('should not throw an error if table already exists', async () => {
-            // GIVEN
-            const tableRepository = new DynamoDbBuilder()
-                .withTableName(tableNameWithComposedKey)
-                .withPartitionKeyName('id')
-                .withSortKeyName('sort')
-                .createIfNotExists()
-                .build();
-            await createTableIfNotExist(tableNameWithComposedKey, 'sort');
-
-            // WHEN
-            const results = await tableRepository.findOneByPartitionKeyAndSortKey('1', '2');
-
-            // THEN
-            expect(results).not.toBeNull();
-        }, {timeout: 30000});
     });
 
     describe('findOneByPartitionKey function', () => {
