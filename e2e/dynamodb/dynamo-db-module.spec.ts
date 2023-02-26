@@ -8,9 +8,10 @@ import {
     DynamoDBClient, ListTablesCommand, PutItemCommand,
     PutItemInput,
     ScanCommand,
-    waitUntilTableExists
+    waitUntilTableExists, waitUntilTableNotExists
 } from '@aws-sdk/client-dynamodb';
 import {dynamoDBItemToItem, itemToDynamoDBItem} from '../../src/repositories/dynamodb/dynamo-db-item';
+import {MAX_WAIT_TIME_IN_SECONDS} from '../../src/repositories/configuration/configuration';
 
 const tableNameWithComposedKey = 'dynamo-db-module-pk-sk-e2e';
 const tableNameWithPartitionKey = 'dynamo-db-module-pk-e2e';
@@ -45,7 +46,7 @@ describe('DynamoDB module', () => {
 
             // THEN
             expect(tableNames).toContain(tableNameWithComposedKey);
-        });
+        }, {timeout: 30000});
 
         test('should not throw an error if table already exists', async () => {
             // GIVEN
@@ -62,7 +63,7 @@ describe('DynamoDB module', () => {
 
             // THEN
             expect(results).not.toBeNull();
-        }, {timeout: 10000});
+        }, {timeout: 30000});
     });
 
     describe('findOneByPartitionKey function', () => {
@@ -78,7 +79,7 @@ describe('DynamoDB module', () => {
             // THEN
             expect(result).not.toBeNull();
             expect(result).toEqual({id: '4', value: 'test 4'});
-        });
+        }, {timeout: 30000});
 
         test('should not return an object if its id does not exists', async () => {
             // GIVEN
@@ -90,7 +91,7 @@ describe('DynamoDB module', () => {
             const result = await dynamoDbRepositoryWithPartitionKey.findOneByPartitionKey('5');
             // THEN
             expect(result).toBeUndefined();
-        });
+        }, {timeout: 30000});
     });
 
     describe('findOneByPartitionKeyAndSortKey function', () => {
@@ -108,7 +109,7 @@ describe('DynamoDB module', () => {
             // THEN
             expect(result).not.toBeNull();
             expect(result).toEqual({id: '4', sort: '2', value: 'test 4 bis'});
-        });
+        }, {timeout: 30000});
 
         test('should not return an object if its id does not exists', async () => {
             // GIVEN
@@ -344,6 +345,7 @@ const emptyTable = async (tableName: string, sortKeyName?: string): Promise<void
         if (sortKeyName) {
             deleteParams.Key[sortKeyName] = item[sortKeyName];
         }
+        // @ts-ignore
         const deleteItemCommand = new DeleteItemCommand(deleteParams);
         await dynamoDbClient.send(deleteItemCommand);
     }
@@ -352,10 +354,14 @@ const emptyTable = async (tableName: string, sortKeyName?: string): Promise<void
 const deleteTableIfExist = async (tableName: string): Promise<any> => {
     const dynamoDbClient = new DynamoDBClient({region: process.env.AWS_REGION});
     try {
-        const deleteTableParams: DeleteTableCommandInput = {
-            TableName: tableName
-        };
-        await dynamoDbClient.send(new DeleteTableCommand(deleteTableParams));
+        const {TableNames} = await dynamoDbClient.send(new ListTablesCommand({}));
+        if (TableNames.some(name => name === tableName)) {
+            const deleteTableParams: DeleteTableCommandInput = {
+                TableName: tableName
+            };
+            return await dynamoDbClient.send(new DeleteTableCommand(deleteTableParams));
+        }
+        return {};
     } catch (err) {
         console.log(err);
     }

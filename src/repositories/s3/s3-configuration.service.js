@@ -55,7 +55,7 @@ class S3ConfigurationService {
                 }
                 else {
                     yield this.s3Client.send(new client_s3_1.CreateBucketCommand({ Bucket: this.bucketName }));
-                    return client_s3_1.waitUntilBucketExists({ client: this.s3Client, maxWaitTime: configuration_1.MAX_WAIT_TIME_IN_SECONDS }, { Bucket: this.bucketName });
+                    return (0, client_s3_1.waitUntilBucketExists)({ client: this.s3Client, maxWaitTime: configuration_1.MAX_WAIT_TIME_IN_SECONDS }, { Bucket: this.bucketName });
                 }
             }
             else {
@@ -71,7 +71,7 @@ class S3ConfigurationService {
                     Key: this.fileName,
                     Body: JSON.stringify(this.contents, null, 2)
                 }));
-                return client_s3_1.waitUntilObjectExists({ client: this.s3Client, maxWaitTime: configuration_1.MAX_WAIT_TIME_IN_SECONDS }, { Bucket: this.bucketName, Key: this.fileName });
+                return (0, client_s3_1.waitUntilObjectExists)({ client: this.s3Client, maxWaitTime: configuration_1.MAX_WAIT_TIME_IN_SECONDS }, { Bucket: this.bucketName, Key: this.fileName });
             }
             else {
                 return Promise.resolve({});

@@ -134,7 +134,7 @@ class S3StorageService {
                 }
                 else {
                     yield this.s3Client.send(new client_s3_1.CreateBucketCommand({ Bucket: this.bucketName }));
-                    return client_s3_1.waitUntilBucketExists({ client: this.s3Client, maxWaitTime: configuration_1.MAX_WAIT_TIME_IN_SECONDS }, { Bucket: this.bucketName });
+                    return (0, client_s3_1.waitUntilBucketExists)({ client: this.s3Client, maxWaitTime: configuration_1.MAX_WAIT_TIME_IN_SECONDS }, { Bucket: this.bucketName });
                 }
             }
             else {

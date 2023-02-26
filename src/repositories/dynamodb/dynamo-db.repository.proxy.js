@@ -34,7 +34,7 @@ class DynamoDbRepositoryProxy {
             }
             else {
                 yield this.dynamoDbClient.send(new client_dynamodb_1.CreateTableCommand(createTableParams));
-                return client_dynamodb_1.waitUntilTableExists({ client: this.dynamoDbClient, maxWaitTime: configuration_1.MAX_WAIT_TIME_IN_SECONDS }, { TableName: this.dynamoDbRepository.tableName });
+                return (0, client_dynamodb_1.waitUntilTableExists)({ client: this.dynamoDbClient, maxWaitTime: configuration_1.MAX_WAIT_TIME_IN_SECONDS }, { TableName: this.dynamoDbRepository.tableName });
             }
         });
     }

@@ -1,3 +1,4 @@
+import {expect, test, describe, beforeEach} from 'vitest';
 import { S3Builder } from '../s3.builder';
 
 describe('S3StorageBuilder', () => {
@@ -8,7 +9,7 @@ describe('S3StorageBuilder', () => {
 
     describe('build function', () => {
 
-        it('should build a storage service', done => {
+        test('should build a storage service', () => {
             // GIVEN
 
             // WHEN
@@ -20,7 +21,6 @@ describe('S3StorageBuilder', () => {
             // THEN
             expect(storageService).not.toBeNull();
             expect(storageService.constructor.name).toEqual('S3StorageService');
-            done();
         });
     });
 });

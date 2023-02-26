@@ -1,4 +1,5 @@
-import { SnsBuilder } from './sns.builder';
+import {expect, test, describe, beforeEach} from 'vitest';
+import {SnsBuilder} from './sns.builder';
 
 describe('SNSBuilder', () => {
 
@@ -8,7 +9,7 @@ describe('SNSBuilder', () => {
 
     describe('build function', () => {
 
-        it('should throw an error if AWS region is not defined', done => {
+        test('should throw an error if AWS region is not defined', () => {
             // GIVEN
             process.env = {};
 
@@ -17,51 +18,39 @@ describe('SNSBuilder', () => {
                 const sns = new SnsBuilder()
                     .withTopicName('topic')
                     .build();
-                fail('Web should never reach here because build function should throw an error when AWS_REGION env variable is not set');
-                done();
+                throw new Error('Web should never reach here because build function should throw an error when AWS_REGION env variable is not set');
             } catch (exception) {
                 // THEN
                 expect(exception).not.toBeNull();
                 expect(exception.message).toEqual('AWS_REGION environment variable must be set');
-                done();
             }
-
         });
 
-        it('should throw an error on build when topic name is not set', done => {
+        test('should throw an error on build when topic name is not set', () => {
             // GIVEN
 
             // WHEN
             try {
                 const sns = new SnsBuilder().build();
-                fail('we should never reach here because an exception should have happened');
-                done();
+                throw new Error('we should never reach here because an exception should have happened');
             } catch (exception) {
                 // THEN
                 expect(exception).not.toBeNull();
                 expect(exception).toEqual(new Error('Topic name is mandatory'));
-                done();
             }
         });
 
-        it('should not throw an error on build when topic name is set', done => {
+        test('should not throw an error on build when topic name is set', () => {
             // GIVEN
 
             // WHEN
-            try {
-                const sns = new SnsBuilder()
-                    .withTopicName('topic')
-                    .build();
-                expect(sns).not.toBeNull();
-                done();
-            } catch (exception) {
-                // THEN
-                fail(exception);
-                done();
-            }
+            const sns = new SnsBuilder()
+                .withTopicName('topic')
+                .build();
+            expect(sns).not.toBeNull();
         });
 
-        it('should build a proxy when creation if not exists is asked', done => {
+        test('should build a proxy when creation if not exists is asked', () => {
             // GIVEN
 
             // WHEN
@@ -73,10 +62,9 @@ describe('SNSBuilder', () => {
             // THEN
             expect(sns).not.toBeNull();
             expect(sns.constructor.name).toEqual('SnsProxy');
-            done();
         });
 
-        it('should build a default implementation when creation if not exists is not asked', done => {
+        test('should build a default implementation when creation if not exists is not asked', () => {
             // GIVEN
 
             // WHEN
@@ -87,13 +75,12 @@ describe('SNSBuilder', () => {
             // THEN
             expect(sns).not.toBeNull();
             expect(sns.constructor.name).toEqual('SnsImplementation');
-            done();
         });
     });
 
     describe('withTopicName function', () => {
 
-        it('should store topic name when called', done => {
+        test('should store topic name when called', () => {
             // GIVEN
 
             // WHEN
@@ -104,7 +91,6 @@ describe('SNSBuilder', () => {
             // THEN
             expect(sns['topicName']).not.toBeNull();
             expect(sns['topicName']).toEqual('test');
-            done();
         });
     });
 });

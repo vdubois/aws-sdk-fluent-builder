@@ -1,3 +1,4 @@
+import {expect, test, describe, beforeEach} from 'vitest';
 import { S3Builder } from '../s3.builder';
 
 describe('S3ConfigurationBuilder', () => {
@@ -8,7 +9,7 @@ describe('S3ConfigurationBuilder', () => {
 
     describe('build function', () => {
 
-        it('should build a configuration service', done => {
+        test('should build a configuration service', () => {
             // GIVEN
 
             // WHEN
@@ -20,13 +21,12 @@ describe('S3ConfigurationBuilder', () => {
             // THEN
             expect(configurationService).not.toBeNull();
             expect(configurationService.constructor.name).toEqual('S3ConfigurationService');
-            done();
         });
     });
 
     describe('withSourceFileName function', () => {
 
-        it('should store source file name', done => {
+        test('should store source file name', () => {
             // GIVEN
 
             // WHEN
@@ -39,13 +39,12 @@ describe('S3ConfigurationBuilder', () => {
             // THEN
             expect(configurationService).not.toBeNull();
             expect(configurationService['fileName']).toEqual('myConfig.json');
-            done();
         });
     });
 
     describe('withContents function', () => {
 
-        it('should store contents of configuration ', done => {
+        test('should store contents of configuration ', () => {
             // GIVEN
 
             // WHEN
@@ -58,13 +57,12 @@ describe('S3ConfigurationBuilder', () => {
             // THEN
             expect(configurationService).not.toBeNull();
             expect(configurationService['contents']).toEqual({myKey: 'myValue'});
-            done();
         });
     });
 
     describe('withFileContents function', () => {
 
-        it('should store contents of configuration', done => {
+        test('should store contents of configuration', () => {
             // GIVEN
 
             // WHEN
@@ -77,10 +75,9 @@ describe('S3ConfigurationBuilder', () => {
             // THEN
             expect(configurationService).not.toBeNull();
             expect(configurationService['contents']).toEqual({test: 'sample', test2: false});
-            done();
         });
 
-        it('should throw an error if file does not exist', done => {
+        test('should throw an error if file does not exist', () => {
             // GIVEN
 
             // WHEN
@@ -90,13 +87,11 @@ describe('S3ConfigurationBuilder', () => {
                     .asConfigurationService()
                     .withFileContents('config.json')
                     .build();
-                fail('we should not reach here because file does not exist');
-                done();
+                throw new Error('we should not reach here because file does not exist');
             } catch (exception) {
                 // THEN
                 expect(exception).not.toBeNull();
                 expect(exception.message).toEqual('File config.json does not exist');
-                done();
             }
         });
     });

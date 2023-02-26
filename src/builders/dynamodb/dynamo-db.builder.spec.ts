@@ -1,3 +1,4 @@
+import {expect, test, describe, beforeEach} from 'vitest';
 import { DynamoDbBuilder } from './dynamo-db.builder';
 import { GENERATED_SORT_KEY } from '../../models/dynamo-db-table-caracteristics.model';
 
@@ -9,23 +10,21 @@ describe('DynamoDBBuilder', () => {
 
     describe('build function', () => {
 
-        it('should throw an error on build when table name is not set', done => {
+        test('should throw an error on build when table name is not set', () => {
             // GIVEN
 
             // WHEN
             try {
                 const dynamoDbRepository = new DynamoDbBuilder().build();
-                fail('we should never arrive here because an exception should have happened');
-                done();
+                throw new Error('we should never arrive here because an exception should have happened');
             } catch (exception) {
                 // THEN
                 expect(exception).not.toBeNull();
                 expect(exception).toEqual(new Error('Table name is mandatory'));
-                done();
             }
         });
 
-        it('should build a valid repository when prerequisites are met', done => {
+        test('should build a valid repository when prerequisites are met', () => {
             // GIVEN
 
             // WHEN
@@ -36,10 +35,9 @@ describe('DynamoDBBuilder', () => {
             // THEN
             expect(dynamoDbRepository).not.toBeNull();
             expect(dynamoDbRepository.constructor.name).toEqual('DynamoDbRepositoryImplementation');
-            done();
         });
 
-        it('should build a proxy repository when creation if not exists is asked', done => {
+        test('should build a proxy repository when creation if not exists is asked', () => {
             // GIVEN
 
             // WHEN
@@ -51,10 +49,9 @@ describe('DynamoDBBuilder', () => {
             // THEN
             expect(dynamoDbRepository).not.toBeNull();
             expect(dynamoDbRepository.constructor.name).toEqual('DynamoDbRepositoryProxy');
-            done();
         });
 
-        it('should build a repository with default values when prerequisites are met', done => {
+        test('should build a repository with default values when prerequisites are met', () => {
             // GIVEN
 
             // WHEN
@@ -67,10 +64,9 @@ describe('DynamoDBBuilder', () => {
             expect(dynamoDbRepository['partitionKeyName']).toEqual('id');
             expect(dynamoDbRepository['readCapacity']).toEqual(1);
             expect(dynamoDbRepository['writeCapacity']).toEqual(1);
-            done();
         });
 
-        it('should throw an error if AWS region is not defined', done => {
+        test('should throw an error if AWS region is not defined', () => {
             // GIVEN
             process.env = {};
 
@@ -79,19 +75,17 @@ describe('DynamoDBBuilder', () => {
                 const dynamoDbRepository = new DynamoDbBuilder()
                     .withTableName('foo')
                     .build();
-                fail('Web should never reach here because build function should throw an error when AWS_REGION env variable is not set');
-                done();
+                throw new Error('Web should never reach here because build function should throw an error when AWS_REGION env variable is not set');
             } catch (exception) {
                 // THEN
                 expect(exception).not.toBeNull();
                 expect(exception.message).toEqual('AWS_REGION environment variable must be set');
-                done();
             }
         });
     });
 
     describe('withTableName function', () => {
-        it('should store table name when called', done => {
+        test('should store table name when called', () => {
             // GIVEN
 
             // WHEN
@@ -102,12 +96,11 @@ describe('DynamoDBBuilder', () => {
             // THEN
             expect(dynamoDbRepository['tableName']).not.toBeNull();
             expect(dynamoDbRepository['tableName']).toEqual('toto');
-            done();
         });
     });
 
     describe('withPartitionKeyName function', () => {
-        it('should store partition key name when called', done => {
+        test('should store partition key name when called', () => {
             // GIVEN
 
             // WHEN
@@ -119,12 +112,11 @@ describe('DynamoDBBuilder', () => {
             // THEN
             expect(dynamoDbRepository['partitionKeyName']).not.toBeNull();
             expect(dynamoDbRepository['partitionKeyName']).toEqual('myKey');
-            done();
         });
     });
 
     describe('withSortKeyName function', () => {
-        it('should store sort key name when called', done => {
+        test('should store sort key name when called', () => {
             // GIVEN
 
             // WHEN
@@ -136,12 +128,11 @@ describe('DynamoDBBuilder', () => {
             // THEN
             expect(dynamoDbRepository['sortKeyName']).not.toBeNull();
             expect(dynamoDbRepository['sortKeyName']).toEqual('sortKey');
-            done();
         });
     });
 
     describe('withGeneratedSortKey function', () => {
-        it('should store sort key name when called', done => {
+        test('should store sort key name when called', () => {
             // GIVEN
 
             // WHEN
@@ -153,12 +144,11 @@ describe('DynamoDBBuilder', () => {
             // THEN
             expect(dynamoDbRepository['sortKeyName']).not.toBeNull();
             expect(dynamoDbRepository['sortKeyName']).toEqual(GENERATED_SORT_KEY);
-            done();
         });
     });
 
     describe('withReadCapacity function', () => {
-        it('should store read capacity when called', done => {
+        test('should store read capacity when called', () => {
             // GIVEN
 
             // WHEN
@@ -170,12 +160,11 @@ describe('DynamoDBBuilder', () => {
             // THEN
             expect(dynamoDbRepository['readCapacity']).not.toBeNull();
             expect(dynamoDbRepository['readCapacity']).toEqual(12);
-            done();
         });
     });
 
     describe('withWriteCapacity function', () => {
-        it('should store write capacity when called', done => {
+        test('should store write capacity when called', () => {
             // GIVEN
 
             // WHEN
@@ -187,7 +176,6 @@ describe('DynamoDBBuilder', () => {
             // THEN
             expect(dynamoDbRepository['writeCapacity']).not.toBeNull();
             expect(dynamoDbRepository['writeCapacity']).toEqual(15);
-            done();
         });
     });
 });
