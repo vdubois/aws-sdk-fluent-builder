@@ -8,10 +8,9 @@ import {
     DynamoDBClient, ListTablesCommand, PutItemCommand,
     PutItemInput,
     ScanCommand,
-    waitUntilTableExists, waitUntilTableNotExists
+    waitUntilTableExists
 } from '@aws-sdk/client-dynamodb';
-import {dynamoDBItemToItem, itemToDynamoDBItem} from '../../src/repositories/dynamodb/dynamo-db-item';
-import {MAX_WAIT_TIME_IN_SECONDS} from '../../src/repositories/configuration/configuration';
+import {marshall, unmarshall} from '@aws-sdk/util-dynamodb';
 
 const tableNameWithComposedKey = 'dynamo-db-module-pk-sk-e2e';
 const tableNameWithPartitionKey = 'dynamo-db-module-pk-e2e';
@@ -354,7 +353,7 @@ const insertItemInTable = (item: any, tableName: string): Promise<any> => {
     const dynamoDbClient = new DynamoDBClient({region: process.env.AWS_REGION});
     const putParams: PutItemInput = {
         TableName: tableName,
-        Item: itemToDynamoDBItem(item)
+        Item: marshall(item)
     };
     return dynamoDbClient.send(new PutItemCommand(putParams));
 };
@@ -362,7 +361,7 @@ const insertItemInTable = (item: any, tableName: string): Promise<any> => {
 const listAll = async (tableName: string): Promise<any> => {
     const dynamoDbClient = new DynamoDBClient({region: process.env.AWS_REGION});
     const {Items} = await dynamoDbClient.send(new ScanCommand({TableName: tableName}));
-    return Items.map(dynamoDbItem => dynamoDBItemToItem(dynamoDbItem));
+    return Items.map(dynamoDbItem => unmarshall(dynamoDbItem));
 };
 
 const listTables = async (): Promise<any> => {

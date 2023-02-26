@@ -9,7 +9,7 @@ import {
   QueryCommand,
   QueryCommandInput
 } from '@aws-sdk/client-dynamodb';
-import {dynamoDBItemToItem, itemToDynamoDBItem} from './dynamo-db-item';
+import {marshall, unmarshall} from '@aws-sdk/util-dynamodb';
 
 export class DynamoDbRepositoryImplementation implements DynamoDbRepository {
 
@@ -52,7 +52,7 @@ export class DynamoDbRepositoryImplementation implements DynamoDbRepository {
     const command = new GetItemCommand(getParams);
     const result = await this.dynamoDbClient.send(command);
     if (result.Item) {
-      return dynamoDBItemToItem(result.Item);
+      return unmarshall(result.Item);
     }
     return undefined;
   }
@@ -71,7 +71,7 @@ export class DynamoDbRepositoryImplementation implements DynamoDbRepository {
     const command = new GetItemCommand(getParams);
     const result = await this.dynamoDbClient.send(command);
     if (result.Item) {
-      return dynamoDBItemToItem(result.Item);
+      return unmarshall(result.Item);
     }
     return undefined;
   }
@@ -88,7 +88,7 @@ export class DynamoDbRepositoryImplementation implements DynamoDbRepository {
     };
     const command = new QueryCommand(queryParams);
     const results = await this.dynamoDbClient.send(command);
-    return results.Items.map(item => dynamoDBItemToItem(item));
+    return results.Items.map(item => unmarshall(item));
   }
 
   save(entity: object): Promise<any> {
@@ -96,7 +96,7 @@ export class DynamoDbRepositoryImplementation implements DynamoDbRepository {
     const putParams: PutItemInput = {
       TableName: this.tableName,
     };
-    putParams.Item = itemToDynamoDBItem(entity);
+    putParams.Item = marshall(entity);
     if (this.withGeneratedSortKey) {
       putParams.Item[`${GENERATED_SORT_KEY}`] = {'S': uuid()};
     }
@@ -123,7 +123,7 @@ export class DynamoDbRepositoryImplementation implements DynamoDbRepository {
       putParams.RequestItems[this.tableName] = entitiesToSave.map(entity => {
         const putRequest = {
           PutRequest: {
-            Item: itemToDynamoDBItem(entity)
+            Item: marshall(entity)
           }
         };
         if (this.withGeneratedSortKey) {

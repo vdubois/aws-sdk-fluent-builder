@@ -13,7 +13,7 @@ exports.DynamoDbRepositoryImplementation = void 0;
 const dynamo_db_table_caracteristics_model_1 = require("../../models/dynamo-db-table-caracteristics.model");
 const uuid_1 = require("uuid");
 const client_dynamodb_1 = require("@aws-sdk/client-dynamodb");
-const dynamo_db_item_1 = require("./dynamo-db-item");
+const util_dynamodb_1 = require("@aws-sdk/util-dynamodb");
 class DynamoDbRepositoryImplementation {
     constructor(caracteristics, dynamoDbClient = new client_dynamodb_1.DynamoDBClient({ region: process.env.AWS_REGION })) {
         this.caracteristics = caracteristics;
@@ -49,7 +49,7 @@ class DynamoDbRepositoryImplementation {
             const command = new client_dynamodb_1.GetItemCommand(getParams);
             const result = yield this.dynamoDbClient.send(command);
             if (result.Item) {
-                return (0, dynamo_db_item_1.dynamoDBItemToItem)(result.Item);
+                return (0, util_dynamodb_1.unmarshall)(result.Item);
             }
             return undefined;
         });
@@ -69,7 +69,7 @@ class DynamoDbRepositoryImplementation {
             const command = new client_dynamodb_1.GetItemCommand(getParams);
             const result = yield this.dynamoDbClient.send(command);
             if (result.Item) {
-                return (0, dynamo_db_item_1.dynamoDBItemToItem)(result.Item);
+                return (0, util_dynamodb_1.unmarshall)(result.Item);
             }
             return undefined;
         });
@@ -87,7 +87,7 @@ class DynamoDbRepositoryImplementation {
             };
             const command = new client_dynamodb_1.QueryCommand(queryParams);
             const results = yield this.dynamoDbClient.send(command);
-            return results.Items.map(item => (0, dynamo_db_item_1.dynamoDBItemToItem)(item));
+            return results.Items.map(item => (0, util_dynamodb_1.unmarshall)(item));
         });
     }
     save(entity) {
@@ -95,7 +95,7 @@ class DynamoDbRepositoryImplementation {
         const putParams = {
             TableName: this.tableName,
         };
-        putParams.Item = (0, dynamo_db_item_1.itemToDynamoDBItem)(entity);
+        putParams.Item = (0, util_dynamodb_1.marshall)(entity);
         if (this.withGeneratedSortKey) {
             putParams.Item[`${dynamo_db_table_caracteristics_model_1.GENERATED_SORT_KEY}`] = { 'S': (0, uuid_1.v4)() };
         }
@@ -120,7 +120,7 @@ class DynamoDbRepositoryImplementation {
                 putParams.RequestItems[this.tableName] = entitiesToSave.map(entity => {
                     const putRequest = {
                         PutRequest: {
-                            Item: (0, dynamo_db_item_1.itemToDynamoDBItem)(entity)
+                            Item: (0, util_dynamodb_1.marshall)(entity)
                         }
                     };
                     if (this.withGeneratedSortKey) {
